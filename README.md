@@ -1,1 +1,1 @@
-# Distrinuted_ChatServer
+# Distributed_ChatServer
