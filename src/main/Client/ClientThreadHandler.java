@@ -1,5 +1,6 @@
 package main.Client;
 
+import main.ChatRoom.ChatRoom;
 import main.Message.ServerMessage;
 import main.Server.ServerState;
 import org.json.simple.JSONObject;
@@ -12,6 +13,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class ClientThreadHandler extends Thread{
@@ -96,5 +98,39 @@ public class ClientThreadHandler extends Thread{
             sendToClient = ServerMessage.getMessage(array[1], String.join(" ", Arrays.copyOfRange(array, 2, array.length)));
             sendBroadCast(sendToClient, socketArrayList);;
         }
+    }
+
+    private void createRoom(String newRoomId, Socket connected, String jsonStringFromClient) throws IOException {
+        if(newRoomId != null && ServerState.getServerState().getChatRoomDictionary().containsKey(newRoomId)){
+            System.out.println("INFO : Received correct room ID ::" + jsonStringFromClient);
+
+            String formerRoomId = clientState.getRoom_id();
+
+            HashMap<String, ClientState> clientList = ServerState.getServerState().getChatRoomDictionary().get(formerRoomId).getClientStateMap();
+
+            ArrayList<Socket> formerSocketList = new ArrayList<>();
+
+            for (String each: clientList.keySet()){
+                if(clientList.get(each).getRoom_id().equals(formerRoomId)){
+                    formerSocketList.add(clientList.get(each).getSocket());
+                }
+            }
+            ServerState.getServerState().getRoomMap().get(formerRoomId).removeParticipants(clientState);
+
+            ChatRoom newRoom = new ChatRoom(clientState.getClient_id(), newRoomId);
+            ServerState.getServerState().getRoomMap().put(newRoomId, newRoom);
+
+            clientState.setRoom_id(newRoomId);
+            newRoom.addParticipants(clientState);
+
+            synchronized (connected) { //TODO : check sync | lock on out buffer?
+                sendMessage(null, "createroom " + newRoomId + " true", null);
+                sendMessage(formerSocketList, "createroomchange " + clientState.getClient_id() + " " + formerRoomId + " " + newRoomId, null);
+            }
+        } else {
+            System.out.println("WARN : Recieved wrong room ID type or room ID already in use");
+            sendMessage(null, "createroom " + newRoomId + " false", null);
+        }
+
     }
 }
