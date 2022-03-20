@@ -54,6 +54,14 @@ public class Main {
             System.out.println("LOG  : TCP Server waiting for clients on port "+
                     ClientServerSocket.getLocalPort()); // port open for clients
 
+//            while (true) {
+//                Socket clientSocket = ClientServerSocket.accept();
+//                ClientHandlerThread clientHandlerThread = new ClientHandlerThread(clientSocket);
+//                // starting the thread
+//                ServerState.getServerState().addClientHandlerThreadToList(clientHandlerThread);
+//                clientHandlerThread.start();
+//            }
+
         }
         catch( IllegalArgumentException e ) {
             System.out.println("ERROR : invalid server ID");
