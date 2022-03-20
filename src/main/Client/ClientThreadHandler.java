@@ -2,6 +2,7 @@ package main.Client;
 
 import main.Message.ServerMessage;
 import main.Server.ServerState;
+import main.ChatRoom.ChatRoom;
 import org.json.simple.JSONObject;
 
 
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 
 public class ClientThreadHandler extends Thread{
     private final Socket clientSocket;
@@ -95,6 +97,52 @@ public class ClientThreadHandler extends Thread{
         else if (array[0].equals("message")){
             sendToClient = ServerMessage.getMessage(array[1], String.join(" ", Arrays.copyOfRange(array, 2, array.length)));
             sendBroadCast(sendToClient, socketArrayList);;
+        }
+    }
+
+// Delete Room
+    private void deleteRoom(int roomID) throws IOException {
+        String formerRoomID = clientState.getRoom_id();
+
+        if (ServerState.getServerState().getRoomMap().containsKey(roomID)) {
+
+            ChatRoom room = ServerState.getServerState().getRoomMap().get(roomID);
+            if (room.getOwner().equals(clientState.getClient_id())) {
+
+                String mainHallRoomID = ServerState.getServerState().getMainHall().getRoom_id();
+
+                HashMap<String,ClientState> formerClientList = ServerState.getServerState().getRoomMap().get(roomID).getClientStateMap();
+                HashMap<String,ClientState> mainHallClientList = ServerState.getServerState().getRoomMap().get(mainHallRoomID).getClientStateMap();
+                mainHallClientList.putAll(formerClientList);
+
+                ArrayList<Socket> socketList = new ArrayList<>();
+                for (String each:mainHallClientList.keySet()){
+                    socketList.add(mainHallClientList.get(each).getSocket());
+                }
+
+                clientState.setRoom_id(mainHallRoomID);
+                ServerState.getServerState().getRoomMap().remove(roomID);
+                ServerState.getServerState().getRoomMap().get(mainHallRoomID).addParticipants(clientState);
+
+                for(String client:formerClientList.keySet()){
+                    String id = formerClientList.get(client).getClient_id();
+                    sendMessage(socketList, "roomchangeall " + id + " " + roomID + " " + mainHallRoomID, null);
+                }
+
+                sendMessage(null, "deleteroom " + roomID + " true", null);
+
+                System.out.println("INFO : room [" + roomID + "] was deleted by : " + clientState.getClient_id());
+
+            } else {
+                sendMessage(null, "deleteroom " + roomID + " false", null);
+                System.out.println("WARN : Requesting client [" + clientState.getClient_id() + "] does not own the room ID [" + roomID + "]");
+            }
+            //TODO : check global, room change all members
+            // } else if(inAnotherServer){
+        }
+        else{
+            System.out.println("WARN : Received room ID [" + roomID + "] does not exist");
+            sendMessage(null, "deleteroom " + roomID + " false", null);
         }
     }
 }
