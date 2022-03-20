@@ -172,7 +172,7 @@ public class ClientThreadHandler extends Thread{
 
     // Delete Room
     private void deleteRoom(int roomID) throws IOException {
-        String formerRoomID = clientState.getRoom_id();
+        String previousRoomID = clientState.getRoom_id();
 
         if (ServerState.getServerState().getRoomMap().containsKey(roomID)) {
 
@@ -215,4 +215,43 @@ public class ClientThreadHandler extends Thread{
             sendMessage(null, "deleteroom " + roomID + " false", null);
         }
     }
+
+    //Join Room
+    private void joinRoom(String roomID) throws IOException {
+        String previousRoomID = clientState.getRoom_id();
+
+        if(clientState.isOwner()){
+
+//            ClientMessageContext msgCtx = new ClientMessageContext().setClient_id(clientState.getClient_id()).setRoom_id(previousRoomID).setPreviousRoom_id(previousRoomID);
+//            System.out.println("WARN : Join room denied, Client" + clientState.getClientID() + " Owns a room");
+//            sendMessage(null, msgCtx.setMessageType(CLIENT_MSG_TYPE.JOIN_ROOM));
+        }
+        else if(ServerState.getServerState().getRoomMap().containsKey(roomID)){
+            clientState.setRoom_id(roomID);
+            ServerState.getServerState().getRoomMap().get(previousRoomID).removeParticipants(clientState);
+            ServerState.getServerState().getRoomMap().get(roomID).addParticipants(clientState);
+
+            System.out.println("INFO : client [" + clientState.getClient_id() + "] joined room :" + roomID);
+
+            //create broadcast list
+            HashMap<String, ClientState> clientList = ServerState.getServerState().getRoomMap().get(roomID).getClientStateMap();
+            HashMap<String, ClientState> clientListOld = ServerState.getServerState().getRoomMap().get(previousRoomID).getClientStateMap();
+            clientList.putAll(clientListOld);
+
+            ArrayList<Socket> SocketList = new ArrayList<>();
+            for (String each:clientList.keySet()){
+                SocketList.add(clientList.get(each).getSocket());
+            }
+
+            sendMessage(SocketList, "roomchangeall " + clientState.getClient_id() + " " + previousRoomID + " " + roomID, null);
+            //TODO : show for ones already in room
+
+            //TODO : check global, route and server change
+            // } else if(inAnotherServer){
+        } else {
+            System.out.println("WARN : Received room ID does not exist");
+            sendMessage(null, "roomchange " + clientState.getClient_id() + " " + previousRoomID + " " + previousRoomID, null);
+        }
+    }
+
 }
