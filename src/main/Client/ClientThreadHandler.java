@@ -133,4 +133,40 @@ public class ClientThreadHandler extends Thread{
         }
 
     }
+
+    private void newID(String clientID, Socket connected, String jsonStringFromClient) throws IOException {
+        if (checkID(clientID) && !ServerState.getServerState().isClientIDAlreadyTaken(clientID)){
+            System.out.println("INFO : Received correct ID ::" + jsonStringFromClient);
+
+            this.clientState = new ClientState(clientID, ServerState.getServerState().getMainHall().getRoom_id(),connected);
+            ServerState.getServerState().getMainHall().addParticipants(clientState);
+
+            synchronized (connected){
+                sendMessage(null, "newid true", null);
+                sendMessage(null, "roomchange" + clientID + "_" + "MainHall-"+ ServerState.getServerState().getServer_id(), null);
+            }
+        }
+        else{
+            System.out.println("WARN : Recieved wrong ID type or ID already in use");
+            sendMessage(null, "newid false", null);
+        }
+    }
+
+    private void list(Socket connected, String jsonStringFromClient) throws IOException {
+        List<String> roomsList = new ArrayList<>(ServerState.getServerState().getRoomMap().keySet());
+        System.out.println("INFO : rooms in the system :");
+        sendMessage(null,"roomlist", roomsList);
+    }
+
+    private void who(Socket connected, String jsomStringFromClient) throws IOException {
+        String roomId = clientState.getRoom_id();
+        ChatRoom room = ServerState.getServerState().getRoomMap().get(roomId);
+        HashMap<String, ClientState> clientStateMap = room.getClientStateMap();
+
+        List<String> participants = new ArrayList<>(clientStateMap.keySet());
+        String owner = room.getOwner();
+
+        System.out.println("LOG  : participants in room [" + roomId + "] : " + participants);
+        sendMessage(null, "roomcontents " + roomId + " " + owner, participants);
+    }
 }
