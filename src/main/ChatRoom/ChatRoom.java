@@ -2,6 +2,7 @@ package main.ChatRoom;
 
 import main.Client.ClientState;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ChatRoom {
     private String room_id;
@@ -9,8 +10,10 @@ public class ChatRoom {
     private String server_id;
 
     ArrayList<ClientState> client_list = new ArrayList<ClientState>();
+    private final HashMap<String, ClientState> clientStateMap = new HashMap<>();
 
-    public ChatRoom(String room_id, String owner, String server_id) {
+
+    public ChatRoom(String room_id, String server_id) {
         this.room_id = room_id;
         this.owner = owner;
         this.server_id = server_id;
@@ -44,5 +47,16 @@ public class ChatRoom {
         client_list.add(clientState);
     }
 
-    //method to get client list
+
+    public synchronized HashMap<String, ClientState> getClientStateMap() {
+        return clientStateMap;
+    }
+
+    public synchronized void addParticipants(ClientState clientState) {
+        this.clientStateMap.put(clientState.getClient_id(), clientState);
+    }
+
+    public synchronized void removeParticipants(ClientState clientState) {
+        this.clientStateMap.remove(clientState.getClient_id());
+    }
 }

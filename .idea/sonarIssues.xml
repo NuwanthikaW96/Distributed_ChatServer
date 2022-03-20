@@ -13,6 +13,11 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/ChatServer.iml">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/src/java/ChatRoom/ChatRoom.java">
           <value>
             <set />
@@ -59,6 +64,11 @@
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/src/main/Client/ClientState.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/main/Client/ClientThreadHandler.java">
           <value>
             <set />
           </value>

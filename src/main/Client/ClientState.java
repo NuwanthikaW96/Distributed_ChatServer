@@ -1,12 +1,15 @@
 package main.Client;
 
 import java.net.Socket;
+import java.util.HashMap;
 
 public class ClientState {
     private String client_id;
     private String room_id;
     private Socket socket;
     private boolean isOwner = false;
+
+
 
     public ClientState(String client_id, String room_id, Socket socket) {
         this.client_id = client_id;

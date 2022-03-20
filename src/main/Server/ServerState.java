@@ -4,6 +4,7 @@ import main.ChatRoom.ChatRoom;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -18,6 +19,7 @@ public class ServerState {
     private int selfID;
 
     public Server leaderServer;
+    private ChatRoom mainHall;
 
     private ConcurrentLinkedQueue<String> chatRoomRequsts  = new ConcurrentLinkedQueue<String>();
     private ConcurrentLinkedQueue<String> identityRequsts  = new ConcurrentLinkedQueue<String>();
@@ -31,6 +33,10 @@ public class ServerState {
     private static ServerState serverStateInstance;
 
     public ServerState(){}
+
+    public ChatRoom getMainHall() {
+        return mainHall;
+    }
 
     public static ServerState getServerState(){
         if (serverStateInstance != null){
@@ -68,6 +74,16 @@ public class ServerState {
             System.out.println("Config file not found");
             e.printStackTrace();
         }
+        this.mainHall = new ChatRoom("MainHall-" + server_id , "default-" + server_id);
+        this.chatRoomDictionary.put("MainHall-" + server_id, mainHall);
+    }
+
+    public boolean isClientIDAlreadyTaken(String clientID){
+        for (Map.Entry<String, ChatRoom> entry : this.getChatRoomDictionary().entrySet()) {
+            ChatRoom room = entry.getValue();
+            if (room.getClientStateMap().containsKey(clientID)) return true;
+        }
+        return false;
     }
 
     public String getServer_id() {
@@ -148,5 +164,9 @@ public class ServerState {
 
     public void setOtherServerUsers(ConcurrentHashMap<String, String> otherServerUsers) {
         this.otherServerUsers = otherServerUsers;
+    }
+
+    public ConcurrentHashMap<String, ChatRoom> getRoomMap() {
+        return chatRoomDictionary;
     }
 }
