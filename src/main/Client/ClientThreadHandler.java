@@ -252,6 +252,20 @@ public class ClientThreadHandler extends Thread{
             System.out.println("WARN : Received room ID does not exist");
             sendMessage(null, "roomchange " + clientState.getClient_id() + " " + previousRoomID + " " + previousRoomID, null);
         }
+    private void message(String content, Socket connected, String fromClient) throws IOException {
+        String id = clientState.getClient_id();
+        String roomId = clientState.getRoom_id();
+
+        HashMap<String, ClientState> clientList = ServerState.getServerState().getChatRoomDictionary().get(roomId).getClientStateMap();
+
+        ArrayList<Socket> roomList = new ArrayList<>();
+
+        for (String each: clientList.keySet()){
+            if (clientList.get(each).getRoom_id().equals(roomId) && !clientList.get(each).getClient_id().equals(id)){
+                roomList.add(clientList.get(each).getSocket());
+            }
+        }
+        sendMessage(roomList, "message "+ id + " " + content, null);
     }
 
 }
