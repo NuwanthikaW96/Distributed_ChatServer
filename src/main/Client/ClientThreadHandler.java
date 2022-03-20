@@ -4,11 +4,11 @@ import main.ChatRoom.ChatRoom;
 import main.Message.ServerMessage;
 import main.Server.ServerState;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -171,7 +171,7 @@ public class ClientThreadHandler extends Thread{
     }
 
     // Delete Room
-    private void deleteRoom(int roomID) throws IOException {
+    private void deleteRoom(String roomID) throws IOException {
         String previousRoomID = clientState.getRoom_id();
 
         if (ServerState.getServerState().getRoomMap().containsKey(roomID)) {
@@ -252,6 +252,7 @@ public class ClientThreadHandler extends Thread{
             System.out.println("WARN : Received room ID does not exist");
             sendMessage(null, "roomchange " + clientState.getClient_id() + " " + previousRoomID + " " + previousRoomID, null);
         }
+    }
     private void message(String content, Socket connected, String fromClient) throws IOException {
         String id = clientState.getClient_id();
         String roomId = clientState.getRoom_id();
@@ -266,6 +267,71 @@ public class ClientThreadHandler extends Thread{
             }
         }
         sendMessage(roomList, "message "+ id + " " + content, null);
+    }
+
+    @Override
+    public void run(){
+        try {
+            System.out.println("INFO : THE CLIENT" + " " + clientSocket.getInetAddress() + ":" + clientSocket.getPort() + " IS CONNECTED ");
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8));
+
+            this.dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
+
+            while (true){
+                String jsonStringFromClient = bufferedReader.readLine();
+
+                if (jsonStringFromClient.equalsIgnoreCase("Exit")){
+                    break;
+                }
+
+                try{
+                    Object object = null;
+                    JSONParser jsonParser = new JSONParser();
+                    object = jsonParser.parse(jsonStringFromClient);
+                    JSONObject jsonObject = (JSONObject) object;
+
+                    if(hasKey(jsonObject, "type")){
+                        if (jsonObject.get("type").equals("newidentity") && jsonObject.get("identity") != null){
+                            String newClientId = jsonObject.get("identity").toString();
+                            newID(newClientId,clientSocket,jsonStringFromClient);
+                        }
+                        if (jsonObject.get("type").equals("createroom") && jsonObject.get("roomid") != null){
+                            String newRoomId = jsonObject.get("roomid").toString();
+                            createRoom(newRoomId,clientSocket,jsonStringFromClient);
+                        }
+                        if (jsonObject.get("type").equals("who")) {
+                            who(clientSocket, jsonStringFromClient);
+                        } //check list
+                        if (jsonObject.get("type").equals("list")) {
+                            list(clientSocket, jsonStringFromClient);
+                        } //check join room
+                        if (jsonObject.get("type").equals("joinroom")) {
+                            String roomID = jsonObject.get("roomid").toString();
+                            joinRoom(roomID);
+                        }
+                        if (jsonObject.get("type").equals("deleteroom")) {
+                            String roomID = jsonObject.get("roomid").toString();
+                            deleteRoom(roomID);
+                        }
+                        if (jsonObject.get("type").equals("message")) {
+                            String content = jsonObject.get("content").toString();
+                            message(content, clientSocket, jsonStringFromClient);
+                        }
+                    }
+                    else {
+                        System.out.println("WARN : Command error, Corrupted JSON");
+                    }
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
