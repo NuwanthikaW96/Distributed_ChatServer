@@ -173,32 +173,41 @@ public class ClientThreadHandler extends Thread{
     // Delete Room
     private void deleteRoom(int roomID) throws IOException {
         String previousRoomID = clientState.getRoom_id();
+        String mainHallRoomID = ServerState.getServerState().getMainHall().getRoom_id();
 
         if (ServerState.getServerState().getRoomMap().containsKey(roomID)) {
 
             ChatRoom room = ServerState.getServerState().getRoomMap().get(roomID);
             if (room.getOwner().equals(clientState.getClient_id())) {
 
-                String mainHallRoomID = ServerState.getServerState().getMainHall().getRoom_id();
-
-                HashMap<String,ClientState> formerClientList = ServerState.getServerState().getRoomMap().get(roomID).getClientStateMap();
+// client in delete room
+                HashMap<String,ClientState> previousClientList = ServerState.getServerState().getRoomMap().get(roomID).getClientStateMap();
+                //client in mainHAll
                 HashMap<String,ClientState> mainHallClientList = ServerState.getServerState().getRoomMap().get(mainHallRoomID).getClientStateMap();
-                mainHallClientList.putAll(formerClientList);
+                mainHallClientList.putAll(previousClientList);
 
                 ArrayList<Socket> socketList = new ArrayList<>();
                 for (String each:mainHallClientList.keySet()){
                     socketList.add(mainHallClientList.get(each).getSocket());
                 }
 
-                clientState.setRoom_id(mainHallRoomID);
+//                clientState.setRoom_id(mainHallRoomID);
                 ServerState.getServerState().getRoomMap().remove(roomID);
-                ServerState.getServerState().getRoomMap().get(mainHallRoomID).addParticipants(clientState);
+//                ServerState.getServerState().getRoomMap().get(mainHallRoomID).addParticipants(clientState);
+                clientState.setOwner(false);
 
-                for(String client:formerClientList.keySet()){
-                    String id = formerClientList.get(client).getClient_id();
+
+                //broadcast roomchange message to all client
+                for(String client:previousClientList.keySet()){
+                    String id = previousClientList.get(client).getClient_id();
+                    previousClientList.get(client).setRoom_id(mainHallRoomID);
+                    ServerState.getServerState().getRoomMap().get(mainHallRoomID).addParticipants(previousClientList.get(client));
+
+                    //+++++ ClientMessageContext
                     sendMessage(socketList, "roomchangeall " + id + " " + roomID + " " + mainHallRoomID, null);
                 }
 
+                
                 sendMessage(null, "deleteroom " + roomID + " true", null);
 
                 System.out.println("INFO : room [" + roomID + "] was deleted by : " + clientState.getClient_id());
@@ -252,6 +261,7 @@ public class ClientThreadHandler extends Thread{
             System.out.println("WARN : Received room ID does not exist");
             sendMessage(null, "roomchange " + clientState.getClient_id() + " " + previousRoomID + " " + previousRoomID, null);
         }
+
     private void message(String content, Socket connected, String fromClient) throws IOException {
         String id = clientState.getClient_id();
         String roomId = clientState.getRoom_id();
