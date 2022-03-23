@@ -1,8 +1,8 @@
 package main.Server;
 
-import main.Client.ClientThreadHandler;
 import main.Heartbeat.Gossiping;
 import main.Heartbeat.Consensus;
+import main.Heartbeat.Heartbeat;
 import main.Model.Constant;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
@@ -75,6 +75,9 @@ public class Main {
         }catch (IOException e) {
             e.printStackTrace();
         }
+
+        Runnable heartbeat = new Heartbeat("Heartbeat");
+        new Thread(heartbeat).start();
 
         if (isGossip) {
             System.out.println("Failure Detection is running GOSSIP mode");

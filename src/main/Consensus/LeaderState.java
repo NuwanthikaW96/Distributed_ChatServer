@@ -35,8 +35,7 @@ public class LeaderState {
     }
 
     public boolean isLeaderElected() {
-        //TODO: return (using BullyAlgorithm)
-        return true;
+        return ServerState.getServerState().isLeaderElected();
     }
 
     public Integer getLeader_id() {
