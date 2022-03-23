@@ -4,9 +4,11 @@ import main.ChatRoom.ChatRoom;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 public class ServerState {
@@ -15,9 +17,18 @@ public class ServerState {
     private String server_id;
     private String server_address;
     private int client_port, coordination_port;
-    private int selfID;
+    private int self_id;
+
+    private AtomicBoolean ongoingConsensus = new AtomicBoolean(false);
+
+    private ConcurrentHashMap<Integer, String> suspectList = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, Integer> heartbeatCountList = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Integer> voteSet = new ConcurrentHashMap<>();
+    
+    private ConcurrentHashMap<Integer, Server> servers = new ConcurrentHashMap<>(); // list of other servers
 
     public Server leaderServer;
+    private ChatRoom mainHall;
 
     private ConcurrentLinkedQueue<String> chatRoomRequsts  = new ConcurrentLinkedQueue<String>();
     private ConcurrentLinkedQueue<String> identityRequsts  = new ConcurrentLinkedQueue<String>();
@@ -31,6 +42,10 @@ public class ServerState {
     private static ServerState serverStateInstance;
 
     public ServerState(){}
+
+    public ChatRoom getMainHall() {
+        return mainHall;
+    }
 
     public static ServerState getServerState(){
         if (serverStateInstance != null){
@@ -55,7 +70,7 @@ public class ServerState {
                     this.server_address = server_config_list[1];
                     this.client_port = Integer.parseInt(server_config_list[2]);
                     this.coordination_port = Integer.parseInt(server_config_list[3]);
-                    this.selfID = Integer.parseInt(server_config_list[0].substring(1, 2));
+                    this.self_id = Integer.parseInt(server_config_list[0].substring(1, 2));
                 }
                 Server server = new Server(server_id, server_address, client_port, coordination_port);
                 ServerDictionary.put(server.getServer_id(), server);
@@ -68,6 +83,16 @@ public class ServerState {
             System.out.println("Config file not found");
             e.printStackTrace();
         }
+        this.mainHall = new ChatRoom("MainHall-" + server_id , "default-" + server_id);
+        this.chatRoomDictionary.put("MainHall-" + server_id, mainHall);
+    }
+
+    public boolean isClientIDAlreadyTaken(String clientID){
+        for (Map.Entry<String, ChatRoom> entry : this.getChatRoomDictionary().entrySet()) {
+            ChatRoom room = entry.getValue();
+            if (room.getClientStateMap().containsKey(clientID)) return true;
+        }
+        return false;
     }
 
     public String getServer_id() {
@@ -100,6 +125,14 @@ public class ServerState {
 
     public void setCoordination_port(int coordination_port) {
         this.coordination_port = coordination_port;
+    }
+
+    public int getSelf_id() {
+        return self_id;
+    }
+
+    public ConcurrentHashMap<Integer, Server> getServers() {
+        return servers;
     }
 
     public ConcurrentLinkedQueue<String> getChatRoomRequsts() {
@@ -152,5 +185,33 @@ public class ServerState {
 
     public void setLeader(Server leader) {
         this.leaderServer = leader;
+    }
+
+    public ConcurrentHashMap<String, ChatRoom> getRoomMap() {
+        return chatRoomDictionary;
+    }
+
+    public synchronized void removeServerInSuspect_list(Integer serverId) {
+        suspectList.remove(serverId);
+    }
+
+    public ConcurrentHashMap<Integer, String> getSuspect_list() {
+        return suspectList;
+    }
+
+    public synchronized void removeServerInCount_list(Integer serverId) {
+        heartbeatCountList.remove(serverId);
+    }
+
+    public ConcurrentHashMap<Integer, Integer> getHeartbeatCount_list() {
+        return heartbeatCountList;
+    }
+    
+    public AtomicBoolean onGoingConsensus() {
+        return ongoingConsensus;
+    }
+
+    public ConcurrentHashMap<String, Integer> getVote_set() {
+        return voteSet;
     }
 }
