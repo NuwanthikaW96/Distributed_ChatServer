@@ -20,7 +20,7 @@ public class ServerState {
     private String server_id;
     private String server_address;
     private int client_port, coordination_port;
-    private int self_id;
+    private int selfID;
 
     private AtomicBoolean ongoingConsensus = new AtomicBoolean(false);
 
@@ -75,7 +75,7 @@ public class ServerState {
                     this.server_address = server_config_list[1];
                     this.client_port = Integer.parseInt(server_config_list[2]);
                     this.coordination_port = Integer.parseInt(server_config_list[3]);
-                    this.self_id = Integer.parseInt(server_config_list[0].substring(1, 2));
+                    this.selfID = Integer.parseInt(server_config_list[0].substring(1, 2));
                 }
                 Server server = new Server(server_id, server_address, client_port, coordination_port);
                 ServerDictionary.put(server.getServer_id(), server);
@@ -170,9 +170,6 @@ public class ServerState {
         this.coordination_port = coordination_port;
     }
 
-    public int getSelf_id() {
-        return self_id;
-    }
 
     public ConcurrentHashMap<Integer, Server> getServers() {
         return servers;
@@ -257,4 +254,14 @@ public class ServerState {
     public ConcurrentHashMap<String, Integer> getVote_set() {
         return voteSet;
     }
+
+    public int getSelfID() {
+        return selfID;
+    }
+
+    public static String getMainHallIDbyServerInt(int server) {
+        return "MainHall-s" + server;
+    }
+
+
 }

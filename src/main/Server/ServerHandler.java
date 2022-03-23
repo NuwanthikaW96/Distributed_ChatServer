@@ -19,12 +19,14 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-public class ServerHandlerThread extends Thread {
+public class ServerHandler extends Thread {
 
     private final ServerSocket serverCoordinationSocket;
     private LeaderStateUpdate leaderStateUpdate = new LeaderStateUpdate();
 
-    public ServerHandlerThread(ServerSocket serverCoordinationSocket) {
+
+
+    public ServerHandler(ServerSocket serverCoordinationSocket) {
         this.serverCoordinationSocket = serverCoordinationSocket;
     }
 
@@ -86,7 +88,7 @@ public class ServerHandlerThread extends Thread {
 
                         ClientThreadHandler clientHandlerThread = ServerState.getServerState()
                                 .getClientHandlerThread(threadID);
-                        clientHandlerThread.setApprovedClientID(approved);
+                        clientHandlerThread.setApprovedClient_id(approved);
                         Object lock = clientHandlerThread.getLock();
                         synchronized (lock) {
                             lock.notifyAll();
@@ -98,12 +100,13 @@ public class ServerHandlerThread extends Thread {
                         String clientID = j_object.get("clientid").toString();
                         String roomID = j_object.get("roomid").toString();
                         int sender = Integer.parseInt(j_object.get("sender").toString());
+                        String sender1 = j_object.get("sender").toString();
                         String threadID = j_object.get("threadid").toString();
 
                         boolean approved = LeaderState.getLeaderState().isRoomCreationApproved(roomID);
 
                         if (approved) {
-                            LeaderState.getLeaderState().addApprovedRoom(clientID, roomID, sender);
+                            LeaderState.getLeaderState().addApprovedRoom(clientID, roomID, sender1);
                         }
                         Server destServer = ServerState.getServerState().getServers()
                                 .get(sender);
@@ -127,7 +130,7 @@ public class ServerHandlerThread extends Thread {
 
                         ClientThreadHandler clientHandlerThread = ServerState.getServerState()
                                 .getClientHandlerThread(threadID);
-                        clientHandlerThread.setApprovedRoomCreation(approved);
+                        clientHandlerThread.setApprovedRoomCreation(Integer.parseInt(approved).t);
                         Object lock = clientHandlerThread.getLock();
                         synchronized (lock) {
                             lock.notifyAll();
@@ -161,8 +164,8 @@ public class ServerHandlerThread extends Thread {
                                 }
                                 Server serverOfTargetRoom = ServerState.getServerState().getServers().get(serverIDofTargetRoom);
 
-                                String host = (approved) ? serverOfTargetRoom.getServerAddress() : "";
-                                String port = (approved) ? String.valueOf(serverOfTargetRoom.getClientsPort()) : "";
+                                String host = (approved) ? serverOfTargetRoom.getServer_address() : "";
+                                String port = (approved) ? String.valueOf(serverOfTargetRoom.getClient_port()) : "";
 
                                 MessageTransfer.sendServer(
                                         ServerMessage.getJoinRoomApprovalReply(
@@ -223,7 +226,7 @@ public class ServerHandlerThread extends Thread {
                         Server destServer = ServerState.getServerState().getServers().get(sender);
 
                         MessageTransfer.sendServer(
-                                ServerMessage.getListResponse(LeaderState.getInstance().getRoomIDList(), threadID),
+                                ServerMessage.getListResponse(LeaderState.getLeaderState().getRoomIDList(), threadID),
                                 destServer
                         );
                     } else if (j_object.get("type").equals("listresponse")) {

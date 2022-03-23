@@ -32,6 +32,9 @@ public class ClientThreadHandler extends Thread{
     private String serverHostAddressOfApprovedJoinRoom;
     private String serverPortOfApprovedJoinRoom;
 
+    private String approvedJoinRoomServerHostAddress;
+    private String approvedJoinRoomServerPort;
+
     Object lock;
 
     private boolean quitFlag = false;
@@ -39,7 +42,7 @@ public class ClientThreadHandler extends Thread{
     public ClientThreadHandler(Socket clientSocket) {
         String serverId = ServerState.getServerState().getServer_id();
         ServerState.getServerState().getChatRoomDictionary().put("MainHall" + serverId , ServerState.getServerState().getMainHall());
-
+        this.lock = new Object();
         this.clientSocket = clientSocket;
     }
 
@@ -322,12 +325,12 @@ public class ClientThreadHandler extends Thread{
 
             //TODO : check global, route and server change
             // } else if(inAnotherServer){
-            while(!LeaderState.getServerState().isLeaderElected()){
+            while(!LeaderState.getLeaderState().isLeaderElected()){
                 Thread.sleep(2000);
             }
 
-            if (LeaderState.getInstance().isLeader()) {
-                LeaderState.getInstance().localJoinRoomClient(clientState, previousRoomID);
+            if (LeaderState.getLeaderState().isLeader()) {
+                LeaderState.getLeaderState().localJoinRoomClient(clientState, previousRoomID);
             } else {
                 //update leader server
                 MessageTransfer.sendToLeader(
@@ -342,14 +345,14 @@ public class ClientThreadHandler extends Thread{
                 );
             }
         }else {
-            while (!LeaderState.getServerState().isLeaderElected()) {
+            while (!LeaderState.getLeaderState().isLeaderElected()) {
                 Thread.sleep(1000);
             }
 
             approvedJoinRoom = -1;
 
-            if (LeaderState.getServerState().isLeader()) {
-                int targetRoomServerID = LeaderState.getInstance().getServerIdIfRoomExist(roomID);
+            if (LeaderState.getLeaderState().isLeader()) {
+                int targetRoomServerID = LeaderState.getLeaderState().getServerIdIfRoomExist(roomID);
 
                 if (targetRoomServerID != -1) {
                     approvedJoinRoom = 1;
@@ -512,4 +515,19 @@ public class ClientThreadHandler extends Thread{
         }
     }
 
+    public Object getLock() {
+        return lock;
+    }
+
+    public void setApprovedJoinRoomServerHostAddress(String approvedJoinRoomServerHostAddress) {
+        this.approvedJoinRoomServerHostAddress = approvedJoinRoomServerHostAddress;
+    }
+
+    public void setApprovedJoinRoomServerPort(String approvedJoinRoomServerPort) {
+        this.approvedJoinRoomServerPort = approvedJoinRoomServerPort;
+    }
+
+    public void setRoomsListTemp(List<String> roomsListTemp) {
+        this.roomsListTemp = roomsListTemp;
+    }
 }
