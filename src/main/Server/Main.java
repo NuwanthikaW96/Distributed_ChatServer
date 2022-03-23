@@ -1,5 +1,12 @@
 package main.Server;
 
+import main.Client.ClientThreadHandler;
+import main.Heartbeat.Gossiping;
+import main.Heartbeat.Consensus;
+import main.Model.Constant;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
+
 import java.net.*;
 import java.io.*;
 import java.io.IOException;
@@ -11,11 +18,11 @@ import java.util.Arrays;
 
 public class Main {
 
-    /*private static Integer alive_interval = 3;
+    private static Integer alive_interval = 3;
     private static Integer alive_error_factor = 5;
     private static Boolean isGossip = true;
     private static Integer consensus_interval=10;
-    private static Integer consensus_vote_duration=5;*/
+    private static Integer consensus_vote_duration=5;
 
     public static void main(String[] args) {
 
@@ -67,6 +74,62 @@ public class Main {
             System.out.println("ERROR : invalid server ID");
         }catch (IOException e) {
             e.printStackTrace();
+        }
+
+        if (isGossip) {
+            System.out.println("Failure Detection is running GOSSIP mode");
+            startGossip();
+            startConsensus();
+        }
+    }
+
+    private static void startGossip() {
+        try {
+
+            JobDetail gossipJob = JobBuilder.newJob(Gossiping.class)
+                    .withIdentity(Constant.GOSSIP_JOB, "group1").build();
+
+            gossipJob.getJobDataMap().put("aliveErrorFactor", alive_error_factor);
+
+            Trigger gossipTrigger = TriggerBuilder
+                    .newTrigger()
+                    .withIdentity(Constant.GOSSIP_JOB_TRIGGER, "group1")
+                    .withSchedule(
+                            SimpleScheduleBuilder.simpleSchedule()
+                                    .withIntervalInSeconds(alive_interval).repeatForever())
+                    .build();
+
+            Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+            scheduler.start();
+            scheduler.scheduleJob(gossipJob, gossipTrigger);
+
+        } catch (SchedulerException e) {
+            System.out.println("ERROR : Error in starting gossiping");
+        }
+    }
+
+    private static void startConsensus() {
+        try {
+
+            JobDetail consensusJob = JobBuilder.newJob(Consensus.class)
+                    .withIdentity(Constant.CONSENSUS_JOB, "group1").build();
+
+            consensusJob.getJobDataMap().put("consensusVoteDuration", consensus_vote_duration);
+
+            Trigger consensusTrigger = TriggerBuilder
+                    .newTrigger()
+                    .withIdentity(Constant.CONSENSUS_JOB_TRIGGER, "group1")
+                    .withSchedule(
+                            SimpleScheduleBuilder.simpleSchedule()
+                                    .withIntervalInSeconds(consensus_interval).repeatForever())
+                    .build();
+
+            Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+            scheduler.start();
+            scheduler.scheduleJob(consensusJob, consensusTrigger);
+
+        } catch (SchedulerException e) {
+            System.out.println("Error in starting consensus");
         }
     }
 
