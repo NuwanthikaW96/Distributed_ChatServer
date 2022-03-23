@@ -183,6 +183,10 @@ public class ServerState {
         this.otherServerUsers = otherServerUsers;
     }
 
+    public void setLeader(Server leader) {
+        this.leaderServer = leader;
+    }
+
     public ConcurrentHashMap<String, ChatRoom> getRoomMap() {
         return chatRoomDictionary;
     }
