@@ -322,12 +322,12 @@ public class ClientThreadHandler extends Thread{
 
             //TODO : check global, route and server change
             // } else if(inAnotherServer){
-            while(!LeaderState.getServerState().isLeaderElected()){
+            while(!LeaderState.getLeaderState().isLeaderElected()){
                 Thread.sleep(2000);
             }
 
-            if (LeaderState.getInstance().isLeader()) {
-                LeaderState.getInstance().localJoinRoomClient(clientState, previousRoomID);
+            if (LeaderState.getLeaderState().isLeader()) {
+                LeaderState.getLeaderState().localJoinRoomClient(clientState, previousRoomID);
             } else {
                 //update leader server
                 MessageTransfer.sendToLeader(
@@ -335,21 +335,21 @@ public class ClientThreadHandler extends Thread{
                                 clientState.getClient_id(),
                                 roomID,
                                 previousRoomID,
-                                String.valueOf(ServerState.getServerState().getSelfID()),
+                                String.valueOf(ServerState.getServerState().getSelf_id()),
                                 String.valueOf(this.getId()),
                                 String.valueOf(true)
                         )
                 );
             }
         }else {
-            while (!LeaderState.getServerState().isLeaderElected()) {
+            while (!LeaderState.getLeaderState().isLeaderElected()) {
                 Thread.sleep(1000);
             }
 
             approvedJoinRoom = -1;
 
-            if (LeaderState.getServerState().isLeader()) {
-                int targetRoomServerID = LeaderState.getInstance().getServerIdIfRoomExist(roomID);
+            if (LeaderState.getLeaderState().isLeader()) {
+                int targetRoomServerID = LeaderState.getLeaderState().getServerIDIfRoomExist(roomID);
 
                 if (targetRoomServerID != -1) {
                     approvedJoinRoom = 1;
@@ -359,8 +359,8 @@ public class ClientThreadHandler extends Thread{
 
                 if (approvedJoinRoom == 1) {
                     Server targetRoomServer = ServerState.getServerState().getServers().get(targetRoomServerID);
-                    serverHostAddressOfApprovedJoinRoom = targetRoomServer.getServerAddress();
-                    serverPortOfApprovedJoinRoom = String.valueOf(targetRoomServer.getClientsPort());
+                    serverHostAddressOfApprovedJoinRoom = targetRoomServer.getServer_address();
+                    serverPortOfApprovedJoinRoom = String.valueOf(targetRoomServer.getClient_port());
                 }
 
                 System.out.println("INFO : Received response for route request for join room (Self is Leader)");
@@ -371,7 +371,7 @@ public class ClientThreadHandler extends Thread{
                                 clientState.getClient_id(),
                                 roomID,
                                 previousRoomID,
-                                String.valueOf(ServerState.getServerState().getSelfID()),
+                                String.valueOf(ServerState.getServerState().getSelf_id()),
                                 String.valueOf(this.getId()),
                                 String.valueOf(false)
                         )

@@ -7,6 +7,7 @@ import org.json.simple.parser.ParseException;
 import main.Server.Server;
 import main.Server.ServerState;
 
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -47,7 +48,19 @@ public class MessageTransfer {
             dataOutputStream.flush();
         }
     }
+
+
     public static boolean hasKey(JSONObject jsonObject, String key) {
         return (jsonObject != null && jsonObject.get(key) != null);
+    }
+    public static void sendToLeader(JSONObject obj) throws IOException
+    {
+        Server destServer = ServerState.getServerState().getServers()
+                .get( LeaderState.getLeaderState().getLeader_id() );
+        Socket socket = new Socket(destServer.getServer_address(),
+                destServer.getCordination_port());
+        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+        dataOutputStream.write((obj.toJSONString() + "\n").getBytes( StandardCharsets.UTF_8));
+        dataOutputStream.flush();
     }
 }

@@ -137,4 +137,17 @@ public class ServerMessage {
         jsonObject.put("senderServerId", selfId);
         return jsonObject;
     }
+    @SuppressWarnings("unchecked")
+    public static JSONObject getJoinRoomRequest(String clientID, String roomID, String formerRoomID, String sender, String threadID, String isLocalRoomChange) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "joinroomapprovalrequest");
+        jsonObject.put("sender", sender);
+        jsonObject.put("roomid", roomID);
+        jsonObject.put("former", formerRoomID);
+        jsonObject.put("clientid", clientID);
+        jsonObject.put("threadid", threadID);
+        jsonObject.put("isLocalRoomChange", isLocalRoomChange);
+        return jsonObject;
+    }
 }
+
