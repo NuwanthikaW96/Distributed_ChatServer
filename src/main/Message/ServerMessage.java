@@ -129,5 +129,12 @@ public class ServerMessage {
         jsonObject.put("vote", vote);
         return jsonObject;
     }
-    
+
+    public static JSONObject electionMessage(String messageType, String selfId) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "election");
+        jsonObject.put("electionMessageType",messageType);
+        jsonObject.put("senderServerId", selfId);
+        return jsonObject;
+    }
 }

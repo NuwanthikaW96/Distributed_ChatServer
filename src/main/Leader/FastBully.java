@@ -1,6 +1,7 @@
 package main.Leader;
 
-import main.Messaging.Sender;
+import main.Message.MessageTransfer;
+import main.Message.ServerMessage;
 import main.Server.Server;
 import main.Server.ServerState;
 
@@ -35,7 +36,7 @@ public class FastBully {
 
     private static void electNewLeader(){
         workingServers.clear();
-        JSONObject electionStartMessage = createElectionMessage("start_election", self);
+        JSONObject electionStartMessage = ServerMessage.electionMessage("start_election", self.getServer_id());
         for (Server server: serverList){
             if ((server.getServer_id()).compareTo(self.getServer_id())>0){
                 try {
@@ -56,7 +57,7 @@ public class FastBully {
         Server highestPriorityServer = getHighestPriorityServer();
         try {
             if (!(highestPriorityServer.getServer_id().equals(self.getServer_id()))) {
-                JSONObject leaderNominationMessage = createElectionMessage("nomination", self);
+                JSONObject leaderNominationMessage = ServerMessage.electionMessage("nomination", self.getServer_id());
                 sendElectionMessage(highestPriorityServer, leaderNominationMessage);
             }else {
                 sendIamCoordinatorMsg();
@@ -72,7 +73,7 @@ public class FastBully {
     public static void replyToElectionStartMessage(JSONObject response){
         String proposerId = (String) response.get("senderServerId");
         Server proposingServer = ServerState.getServerState().getServerDictionary().get(proposerId);
-        JSONObject electionAnswerMessage = createElectionMessage("answer_election", self);
+        JSONObject electionAnswerMessage = ServerMessage.electionMessage("answer_election", self.getServer_id());
         System.out.println(self.getServer_id() + "answering to election message");
         try {
             sendElectionMessage(proposingServer, electionAnswerMessage);
@@ -101,7 +102,7 @@ public class FastBully {
     }
 
     public static void serverRecoveredMessage(){
-        JSONObject IamUpMessage = createElectionMessage("IamUp", FastBully.self);
+        JSONObject IamUpMessage = ServerMessage.electionMessage("IamUp", self.getServer_id());
         workingServers.clear();
         for (Server server: serverList){
             try {
@@ -128,7 +129,7 @@ public class FastBully {
     public static void receiveIamUpMessage(JSONObject response){
         String senderId = (String) response.get("senderServerId");
         Server senderServer = ServerState.getServerState().getServerDictionary().get(senderId);
-        JSONObject viewMessage = createElectionMessage("view", self);
+        JSONObject viewMessage = ServerMessage.electionMessage("view", self.getServer_id());
         try {
             sendElectionMessage(senderServer, viewMessage);
         } catch (IOException e) {
@@ -143,15 +144,7 @@ public class FastBully {
     }
 
     private static void sendElectionMessage(Server server, JSONObject message) throws IOException{
-        Sender.sendRespond(server.getServerSocketConnection(), message);
-    }
-
-    private static JSONObject createElectionMessage(String messageType, Server self){
-        JSONObject message = new JSONObject();
-        message.put("type", "election");
-        message.put("electionMessageType",messageType);
-        message.put("senderServerId", ServerState.getServerState().getServer_id());
-        return message;
+        MessageTransfer.sendServer(message, server);
     }
 
     private static Server getHighestPriorityServer(){
@@ -169,7 +162,7 @@ public class FastBully {
     }
 
     private static void sendIamCoordinatorMsg(){
-        JSONObject iAmCoordinatorMessage = createElectionMessage("inform_coordinator", self);
+        JSONObject iAmCoordinatorMessage = ServerMessage.electionMessage("inform_coordinator", self.getServer_id());
         for (Server server: FastBully.workingServers){
             try {
                 sendElectionMessage(server, iAmCoordinatorMessage);
