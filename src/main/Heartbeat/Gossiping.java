@@ -30,7 +30,7 @@ public class Gossiping implements Job {
         // First work on heartbeat vector and suspect failure server list
 
         for (Server serverInfo : serverState.getServers().values()){
-            Integer serverId = serverInfo.getServer_id();
+            Integer serverId = Integer.valueOf(serverInfo.getServer_id());
             Integer myServerId = serverState.getSelf_id();
 
             // Get current heartbeat count of a server
@@ -72,7 +72,7 @@ public class Gossiping implements Job {
             Integer serverIndex = ThreadLocalRandom.current().nextInt(numOfServers - 1);
             ArrayList<Server> remoteServer = new ArrayList<>();
             for (Server server : serverState.getServers().values()) {
-                Integer serverId = server.getServer_id();
+                Integer serverId = Integer.valueOf(server.getServer_id());
                 Integer myServerId = serverState.getSelf_id();
                 if (!serverId.equals(myServerId)) {
                     remoteServer.add(server);
@@ -127,4 +127,3 @@ public class Gossiping implements Job {
 
     }
 }
-
