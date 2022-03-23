@@ -38,6 +38,15 @@ public class LeaderState {
         return true;
     }
 
+    public int getServerIdIfRoomExist(String roomID) {
+        if (this.activeChatRooms.containsKey(roomID)) {
+            ChatRoom targetRoom = activeChatRooms.get(roomID);
+            return targetRoom.getServer_id();
+        } else {
+            return -1;
+        }
+    }
+
     public Integer getLeader_id() {
         return leader_id;
     }
