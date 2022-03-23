@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 public class ServerState {
@@ -16,7 +17,15 @@ public class ServerState {
     private String server_id;
     private String server_address;
     private int client_port, coordination_port;
-    private int selfID;
+    private int self_id;
+
+    private AtomicBoolean ongoingConsensus = new AtomicBoolean(false);
+
+    private ConcurrentHashMap<Integer, String> suspectList = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, Integer> heartbeatCountList = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Integer> voteSet = new ConcurrentHashMap<>();
+    
+    private ConcurrentHashMap<Integer, Server> servers = new ConcurrentHashMap<>(); // list of other servers
 
     public Server leaderServer;
     private ChatRoom mainHall;
@@ -61,7 +70,7 @@ public class ServerState {
                     this.server_address = server_config_list[1];
                     this.client_port = Integer.parseInt(server_config_list[2]);
                     this.coordination_port = Integer.parseInt(server_config_list[3]);
-                    this.selfID = Integer.parseInt(server_config_list[0].substring(1, 2));
+                    this.self_id = Integer.parseInt(server_config_list[0].substring(1, 2));
                 }
                 Server server = new Server(server_id, server_address, client_port, coordination_port);
                 ServerDictionary.put(server.getServer_id(), server);
@@ -118,6 +127,14 @@ public class ServerState {
         this.coordination_port = coordination_port;
     }
 
+    public int getSelf_id() {
+        return self_id;
+    }
+
+    public ConcurrentHashMap<Integer, Server> getServers() {
+        return servers;
+    }
+
     public ConcurrentLinkedQueue<String> getChatRoomRequsts() {
         return chatRoomRequsts;
     }
@@ -168,5 +185,29 @@ public class ServerState {
 
     public ConcurrentHashMap<String, ChatRoom> getRoomMap() {
         return chatRoomDictionary;
+    }
+
+    public synchronized void removeServerInSuspect_list(Integer serverId) {
+        suspectList.remove(serverId);
+    }
+
+    public ConcurrentHashMap<Integer, String> getSuspect_list() {
+        return suspectList;
+    }
+
+    public synchronized void removeServerInCount_list(Integer serverId) {
+        heartbeatCountList.remove(serverId);
+    }
+
+    public ConcurrentHashMap<Integer, Integer> getHeartbeatCount_list() {
+        return heartbeatCountList;
+    }
+    
+    public AtomicBoolean onGoingConsensus() {
+        return ongoingConsensus;
+    }
+
+    public ConcurrentHashMap<String, Integer> getVote_set() {
+        return voteSet;
     }
 }
