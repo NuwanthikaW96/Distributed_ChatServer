@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-// import consensus.BullyAlgorithm;
 import org.json.simple.JSONObject;
 import org.quartz.Job;
 import org.quartz.JobDataMap;

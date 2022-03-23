@@ -5,8 +5,9 @@ import java.util.ArrayList;
 
 public class Server {
     private String server_id;
+    private int coordination_port;
     private String server_address;
-    private int client_port, coordination_port;
+    private int client_port;
 
     ArrayList<ChatRoom> chat_room_list = new ArrayList<ChatRoom>();
 
@@ -33,7 +34,7 @@ public class Server {
     public void setServer_address(String server_address) {
         this.server_address = server_address;
     }
-
+ 
     public int getClient_port() {
         return client_port;
     }
@@ -42,7 +43,7 @@ public class Server {
         this.client_port = client_port;
     }
 
-    public int getCordination_port() {
+    public int getCoordination_port() {
         return coordination_port;
     }
 

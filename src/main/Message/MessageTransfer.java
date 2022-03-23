@@ -47,4 +47,16 @@ public class MessageTransfer {
             dataOutputStream.flush();
         }
     }
+
+    //Sending message to leader server
+    public static void sendToLeader(JSONObject obj) throws IOException
+    {
+        Server destServer = ServerState.getServerState().getServers()
+                .get( LeaderState.getLeaderState().getLeader_id() );
+        Socket socket = new Socket(destServer.getServer_address(),
+                destServer.getCoordination_port());
+        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+        dataOutputStream.write((obj.toJSONString() + "\n").getBytes( StandardCharsets.UTF_8));
+        dataOutputStream.flush();
+    }
 }

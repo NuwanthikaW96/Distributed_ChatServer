@@ -16,7 +16,8 @@ public class ServerState {
 
     private String server_id;
     private String server_address;
-    private int client_port, coordination_port;
+    private int client_port;
+    private int coordination_port;
     private int self_id;
 
     private AtomicBoolean ongoingConsensus = new AtomicBoolean(false);
@@ -111,16 +112,16 @@ public class ServerState {
         this.server_address = server_address;
     }
 
+    public int getCoordination_port() {
+        return coordination_port;
+    }
+
     public int getClient_port() {
         return client_port;
     }
 
     public void setClient_port(int client_port) {
         this.client_port = client_port;
-    }
-
-    public int getCoordination_port() {
-        return coordination_port;
     }
 
     public void setCoordination_port(int coordination_port) {
