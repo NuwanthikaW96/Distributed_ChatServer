@@ -32,9 +32,6 @@ public class ClientThreadHandler extends Thread{
     private String serverHostAddressOfApprovedJoinRoom;
     private String serverPortOfApprovedJoinRoom;
 
-    private String approvedJoinRoomServerHostAddress;
-    private String approvedJoinRoomServerPort;
-
     Object lock;
 
     private boolean quitFlag = false;
@@ -42,7 +39,7 @@ public class ClientThreadHandler extends Thread{
     public ClientThreadHandler(Socket clientSocket) {
         String serverId = ServerState.getServerState().getServer_id();
         ServerState.getServerState().getChatRoomDictionary().put("MainHall" + serverId , ServerState.getServerState().getMainHall());
-        this.lock = new Object();
+
         this.clientSocket = clientSocket;
     }
 
@@ -338,7 +335,7 @@ public class ClientThreadHandler extends Thread{
                                 clientState.getClient_id(),
                                 roomID,
                                 previousRoomID,
-                                String.valueOf(ServerState.getServerState().getSelfID()),
+                                String.valueOf(ServerState.getServerState().getSelf_id()),
                                 String.valueOf(this.getId()),
                                 String.valueOf(true)
                         )
@@ -352,7 +349,7 @@ public class ClientThreadHandler extends Thread{
             approvedJoinRoom = -1;
 
             if (LeaderState.getLeaderState().isLeader()) {
-                int targetRoomServerID = LeaderState.getLeaderState().getServerIdIfRoomExist(roomID);
+                int targetRoomServerID = LeaderState.getLeaderState().getServerIDIfRoomExist(roomID);
 
                 if (targetRoomServerID != -1) {
                     approvedJoinRoom = 1;
@@ -362,8 +359,8 @@ public class ClientThreadHandler extends Thread{
 
                 if (approvedJoinRoom == 1) {
                     Server targetRoomServer = ServerState.getServerState().getServers().get(targetRoomServerID);
-                    serverHostAddressOfApprovedJoinRoom = targetRoomServer.getServerAddress();
-                    serverPortOfApprovedJoinRoom = String.valueOf(targetRoomServer.getClientsPort());
+                    serverHostAddressOfApprovedJoinRoom = targetRoomServer.getServer_address();
+                    serverPortOfApprovedJoinRoom = String.valueOf(targetRoomServer.getClient_port());
                 }
 
                 System.out.println("INFO : Received response for route request for join room (Self is Leader)");
@@ -374,7 +371,7 @@ public class ClientThreadHandler extends Thread{
                                 clientState.getClient_id(),
                                 roomID,
                                 previousRoomID,
-                                String.valueOf(ServerState.getServerState().getSelfID()),
+                                String.valueOf(ServerState.getServerState().getSelf_id()),
                                 String.valueOf(this.getId()),
                                 String.valueOf(false)
                         )
@@ -414,6 +411,48 @@ public class ClientThreadHandler extends Thread{
             }
             approvedJoinRoom = -1;
         }
+    }
+
+    private void moveJoin(String roomID, String formerRoomID, String clientID) throws IOException, InterruptedException {
+        roomID = (ServerState.getServerState().getRoomMap().containsKey(roomID))? roomID:ServerState.getServerState().getMainHallID();
+        this.clientState = new ClientState(clientID, roomID, clientSocket);
+        ServerState.getServerState().getRoomMap().get(roomID).addParticipants(clientState);
+
+        //create broadcast list
+        HashMap<String, ClientState> clientListNew = ServerState.getServerState().getRoomMap().get(roomID).getClientStateMap();
+
+        ArrayList<Socket> SocketList = new ArrayList<>();
+        for (String each : clientListNew.keySet()) {
+            SocketList.add(clientListNew.get(each).getSocket());
+        }
+
+
+
+//        messageSend(null, msgCtx.setMessageType(CLIENT_MSG_TYPE.SERVER_CHANGE));
+//        messageSend(SocketList, msgCtx.setMessageType(CLIENT_MSG_TYPE.BROADCAST_JOIN_ROOM));
+
+
+        while (!LeaderState.getLeaderState().isLeaderElected()) {
+            Thread.sleep(1000);
+        }
+
+        //if self is leader update leader state directly
+        if (LeaderState.getLeaderState().isLeader()) {
+            ClientState client = new ClientState(clientID, roomID, null);
+            LeaderState.getLeaderState().clientAdd(client);
+        } else {
+            //update leader server
+            MessageTransfer.sendToLeader(
+                    ServerMessage.getMoveJoinRequest(
+                            clientState.getClient_id(),
+                            roomID,
+                            formerRoomID,
+                            String.valueOf(ServerState.getServerState().getSelf_id()),
+                            String.valueOf(this.getId())
+                    )
+            );
+        }
+
     }
     private void message(String content, Socket connected, String fromClient) throws IOException {
         String id = clientState.getClient_id();
@@ -515,19 +554,4 @@ public class ClientThreadHandler extends Thread{
         }
     }
 
-    public Object getLock() {
-        return lock;
-    }
-
-    public void setApprovedJoinRoomServerHostAddress(String approvedJoinRoomServerHostAddress) {
-        this.approvedJoinRoomServerHostAddress = approvedJoinRoomServerHostAddress;
-    }
-
-    public void setApprovedJoinRoomServerPort(String approvedJoinRoomServerPort) {
-        this.approvedJoinRoomServerPort = approvedJoinRoomServerPort;
-    }
-
-    public void setRoomsListTemp(List<String> roomsListTemp) {
-        this.roomsListTemp = roomsListTemp;
-    }
 }

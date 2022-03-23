@@ -35,8 +35,7 @@ public class LeaderState {
     }
 
     public boolean isLeaderElected() {
-        //TODO: return (using BullyAlgorithm)
-        return true;
+        return ServerState.getServerState().isLeaderElected();
     }
 
     public Integer getLeader_id() {
@@ -60,5 +59,26 @@ public class LeaderState {
         }
 
     }
+    public void clientAdd(ClientState client) {
+        activeClientsList.add(client.getClient_id());
+        activeChatRooms.get(client.getRoom_id()).addParticipants(client);
+    }
 
+    public void clientRemove (String clientID, String formerRoomID) {
+        activeClientsList.remove(clientID);
+        activeChatRooms.get(formerRoomID).removeParticipants(clientID);
+    }
+
+    public void localJoinRoomClient(ClientState clientState, String formerRoomID) {
+        clientRemove(clientState.getClient_id(), formerRoomID);
+        clientAdd(clientState);
+    }
+    public int getServerIDIfRoomExist(String roomID) {
+        if (this.activeChatRooms.containsKey(roomID)) {
+            ChatRoom targetRoom = activeChatRooms.get(roomID);
+            return Integer.parseInt(targetRoom.getServer_id());
+        } else {
+            return -1;
+        }
+    }
 }
