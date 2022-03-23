@@ -149,4 +149,8 @@ public class ServerState {
     public void setOtherServerUsers(ConcurrentHashMap<String, String> otherServerUsers) {
         this.otherServerUsers = otherServerUsers;
     }
+
+    public void setLeader(Server leader) {
+        this.leaderServer = leader;
+    }
 }
