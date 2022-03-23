@@ -144,4 +144,16 @@ public class ServerMessage {
         jsonObject.put("sender", senderId);
         return jsonObject;
     }
+
+    public static JSONObject getClientIdApprovalReply(String valueOf, String threadID) {
+    }
+
+    public static JSONObject getRoomCreateApprovalReply(String valueOf, String threadID) {
+    }
+
+    public static JSONObject getJoinRoomApprovalReply(String valueOf, String threadID, String host, String port) {
+    }
+
+    public static JSONObject getListResponse(Object roomIDList, String threadID) {
+    }
 }

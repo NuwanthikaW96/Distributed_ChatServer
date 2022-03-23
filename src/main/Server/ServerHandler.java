@@ -7,7 +7,6 @@ import main.Client.ClientState;
 
 
 import main.Consensus.LeaderState;
-import main.Consensus.LeaderStateUpdate;
 import main.Leader.FastBully;
 import main.Message.MessageTransfer;
 import main.Message.ServerMessage;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 public class ServerHandlerThread extends Thread {
 
     private final ServerSocket serverCoordinationSocket;
-    private LeaderStateUpdate leaderStateUpdate = new LeaderStateUpdate();
 
     public ServerHandlerThread(ServerSocket serverCoordinationSocket) {
         this.serverCoordinationSocket = serverCoordinationSocket;
@@ -186,8 +184,8 @@ public class ServerHandlerThread extends Thread {
                                 }
                                 Server serverOfTargetRoom = ServerState.getServerState().getServers().get(serverIDofTargetRoom);
 
-                                String host = (approved) ? serverOfTargetRoom.getServerAddress() : "";
-                                String port = (approved) ? String.valueOf(serverOfTargetRoom.getClientsPort()) : "";
+                                String host = (approved) ? serverOfTargetRoom.getServer_address() : "";
+                                String port = (approved) ? String.valueOf(serverOfTargetRoom.getClient_port()) : "";
 
                                 MessageTransfer.sendServer(
                                         ServerMessage.getJoinRoomApprovalReply(
@@ -248,7 +246,7 @@ public class ServerHandlerThread extends Thread {
                         Server destServer = ServerState.getServerState().getServers().get(sender);
 
                         MessageTransfer.sendServer(
-                                ServerMessage.getListResponse(LeaderState.getInstance().getRoomIDList(), threadID),
+                                ServerMessage.getListResponse(LeaderState.getLeaderState().getRoomIDList(), threadID),
                                 destServer
                         );
                     } else if (j_object.get("type").equals("listresponse")) {
@@ -279,25 +277,6 @@ public class ServerHandlerThread extends Thread {
                         // leader removes client from global room list
                         LeaderState.getLeaderState().removeClient(clientID, formerRoomID);
                         System.out.println("INFO : Client '" + clientID + "' deleted by leader");
-
-                    } else if (j_object.get("type").equals("leaderstateupdate")) {
-                        if( LeaderState.getLeaderState().isLeaderElectedAndIamLeader() )
-                        {
-                            if( !leaderStateUpdate.isAlive() )
-                            {
-                                leaderStateUpdate = new LeaderStateUpdate();
-                                leaderStateUpdate.start();
-                            }
-                            leaderStateUpdate.receiveUpdate( j_object );
-                        }
-
-                    } else if (j_object.get("type").equals("leaderstateupdatecomplete")) {
-                        int serverID = Integer.parseInt(j_object.get("serverid").toString());
-                        if( LeaderState.getLeaderState().isLeaderElectedAndMessageFromLeader( serverID ) )
-                        {
-                            System.out.println("INFO : Received leader update complete message from s"+serverID);
-                            BullyAlgorithm.leaderUpdateComplete = true;
-                        }
 
                     } else if (j_object.get("type").equals("gossip")) {
                         GossipJob.receiveMessages(j_object);
