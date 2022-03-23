@@ -6,6 +6,16 @@ import java.util.*;
 
 public class ServerMessage {
 
+    private static ServerMessage instance = null;
+
+    private ServerMessage() {
+    }
+
+    public static synchronized ServerMessage getServerMessage() {
+        if (instance == null) instance = new ServerMessage();
+        return instance;
+    }
+
     @SuppressWarnings("unchecked")
     public static JSONObject getApprovalNewID(String approve) {
         JSONObject jsonObject = new JSONObject();
@@ -82,5 +92,49 @@ public class ServerMessage {
         join.put("identity",id);
         join.put("content",content);
         return join;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONObject gossipMessage(Integer serverId, HashMap<Integer, Integer> heartbeatCountList) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "gossip");
+        jsonObject.put("serverId", serverId);
+        jsonObject.put("heartbeatCountList", heartbeatCountList);
+        return jsonObject;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONObject startVoteMessage(Integer serverId, Integer suspectServerId) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "startVote");
+        jsonObject.put("serverId", serverId);
+        jsonObject.put("suspectServerId", suspectServerId);
+        return jsonObject;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONObject notifyServerDownMessage(Integer serverId) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "notifyserverdown");
+        jsonObject.put("serverId", serverId);
+        return jsonObject;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONObject answerVoteMessage(Integer suspectServerId, String vote, Integer votedBy){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "answervote");
+        jsonObject.put("suspectServerId", suspectServerId);
+        jsonObject.put("votedBy", votedBy);
+        jsonObject.put("vote", vote);
+        return jsonObject;
+    }
+
+    public static JSONObject electionMessage(String messageType, String selfId) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "election");
+        jsonObject.put("electionMessageType",messageType);
+        jsonObject.put("senderServerId", selfId);
+        return jsonObject;
     }
 }
