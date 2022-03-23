@@ -1,21 +1,21 @@
 package main.Heartbeat;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ThreadLocalRandom;
+
 // import consensus.BullyAlgorithm;
 import org.json.simple.JSONObject;
-import main.Server.ServerState;
-import main.Message.ServerMessage;
-import main.Server.Server;
-import main.Consensus.LeaderState;
-import main.Message.MessageTransfer;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import java.util.ArrayList;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Random;
+
+import main.Consensus.LeaderState;
+import main.Message.MessageTransfer;
+import main.Message.ServerMessage;
+import main.Server.Server;
+import main.Server.ServerState;
 
 public class Gossiping implements Job {
     private ServerState serverState = ServerState.getServerState();

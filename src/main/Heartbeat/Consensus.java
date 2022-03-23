@@ -1,14 +1,18 @@
 package main.Heartbeat;
 
+import java.util.ArrayList;
+
+import org.json.simple.JSONObject;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+
 import main.Consensus.LeaderState;
 import main.Message.MessageTransfer;
 import main.Message.ServerMessage;
-import org.json.simple.JSONObject;
-import org.quartz.*;
 import main.Server.Server;
 import main.Server.ServerState;
-
-import java.util.ArrayList;
 
 public class Consensus implements Job {
 

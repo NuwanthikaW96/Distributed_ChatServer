@@ -1,12 +1,11 @@
 package main.Consensus;
 
-import main.Client.ClientState;
-import main.ChatRoom.ChatRoom;
-import main.Server.ServerState;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import main.ChatRoom.ChatRoom;
+import main.Server.ServerState;
 
 public class LeaderState {
     private Integer leader_id;
