@@ -8,6 +8,7 @@ import main.Client.ClientState;
 
 import main.Consensus.LeaderState;
 import main.Consensus.LeaderStateUpdate;
+import main.Leader.FastBully;
 import main.Message.MessageTransfer;
 import main.Message.ServerMessage;
 import org.json.simple.JSONArray;
@@ -42,9 +43,33 @@ public class ServerHandlerThread extends Thread {
                 JSONObject j_object = MessageTransfer.convertToJson(jsonStringFromServer);
 
 
-                if (MessageTransfer.hasKey(j_object, "option")) {
-                    // messages with 'option' tag will be handled inside BullyAlgorithm
-                    BullyAlgorithm.receiveMessages(j_object);
+                if (MessageTransfer.hasKey(j_object, "election")) {
+                    String electionMessageType = (String) j_object.get("electionMessageType");
+                    switch(electionMessageType){
+                        case "start_election":
+                            FastBully.replyToElectionStartMessage(j_object);
+                            break;
+
+                        case "answer_election":
+                            FastBully.receiveElectionAnswerMessage(j_object);
+                            break;
+
+                        case "nomination":
+                            FastBully.receiveNominationMessage(j_object);
+                            break;
+
+                        case "inform_coordinator":
+                            FastBully.receiveCoordinatorConfirmationMessage(j_object);
+                            break;
+
+                        case "IamUp":
+                            FastBully.receiveIamUpMessage(j_object);
+                            break;
+
+                        case "view":
+                            FastBully.receiveViewMessage(j_object);
+                            break;
+                    }
                 } else if (MessageTransfer.hasKey(j_object, "type")) {
 
                     if (j_object.get("type").equals("clientidapprovalrequest")
