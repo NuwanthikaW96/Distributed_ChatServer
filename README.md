@@ -31,7 +31,7 @@ eg: java -jar client.jar -h localhost -p 4444 -i Adel <br/>
 
 A chat server can be executed as: <br/>
 ```java -jar server.jar [server_name] "[location of server configuration file]"``` <br/>
-eg: java -jar server.jar s1 "C:code\src\main\java\config\server_conf.txt"
+eg: java -jar server.jar s1 "C:code\src\main\java\config\server_config.txt"
 
 ## Instructions to Build the executable Jar
 
