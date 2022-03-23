@@ -120,7 +120,7 @@ public class Gossiping implements Job {
                 for (String serverId : gossipFromOthers.keySet()) {
                     if (!serverState.getHeartbeatCount_list().containsKey(serverId)) {
                         serverState.getSuspect_list().put(Integer.parseInt(serverId), "SUSPECTED");
-                    }
+                    }  
                 }
             }
         }
