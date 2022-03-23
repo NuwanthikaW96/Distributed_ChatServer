@@ -275,7 +275,8 @@ public class ServerState {
         return getMainHallIDbyServerInt(this.self_id);
     }
     public static String getMainHallIDbyServerInt(int server) {
-        return "MainHall-s" + server;
+        return "MainHall-s" + server;}
+        
     public static void removeSuspectServer(String suspectServerId) {
         if (ServerState.getServerState().getServerDictionary().containsKey(suspectServerId)) {
             ServerState.getServerState().removeServer(suspectServerId);

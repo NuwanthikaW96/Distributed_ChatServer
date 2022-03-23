@@ -46,7 +46,7 @@ public class LeaderStateUpdate extends Thread {
 
                     // send update complete message to other servers
                     for ( int key : ServerState.getServerState().getServers().keySet() ) {
-                        if ( key != ServerState.getServerState().getSelfID() ){
+                        if ( key != ServerState.getServerState().getSelf_id() ){
                             Server destServer = ServerState.getServerState().getServers().get(key);
 
                             try {
@@ -54,10 +54,10 @@ public class LeaderStateUpdate extends Thread {
                                         ServerMessage.getLeaderStateUpdateComplete( String.valueOf(ServerState.getServerState().getSelfID()) ),
                                         destServer
                                 );
-                                System.out.println("INFO : Sent leader update complete message to s"+destServer.getServerID());
+                                System.out.println("INFO : Sent leader update complete message to s"+destServer.getServer_id());
                             }
                             catch(Exception e) {
-                                System.out.println("WARN : Server s"+destServer.getServerID()+
+                                System.out.println("WARN : Server s"+destServer.getServer_id()+
                                         " has failed, it will not receive the leader update complete message");
                             }
                         }
@@ -80,12 +80,12 @@ public class LeaderStateUpdate extends Thread {
         //System.out.println(chatRoomsList);
 
         for( Object clientID : clientIdList ) {
-            LeaderState.getInstance().addClientLeaderUpdate( clientID.toString() );
+            LeaderState.getLeaderState().addClientLeaderUpdate( clientID.toString() );
         }
 
         for( Object chatRoom : chatRoomsList ) {
             JSONObject j_room = (JSONObject)chatRoom;
-            LeaderState.getInstance().addApprovedRoom( j_room.get("clientid").toString(),
+            LeaderState.getLeaderState().addApprovedRoom( j_room.get("clientid").toString(),
                     j_room.get("roomid").toString(), Integer.parseInt(j_room.get("serverid").toString()) );
         }
     }
