@@ -137,4 +137,11 @@ public class ServerMessage {
         jsonObject.put("senderServerId", selfId);
         return jsonObject;
     }
+
+    public static JSONObject heartbeatMessage(String senderId) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "heartbeat");
+        jsonObject.put("sender", senderId);
+        return jsonObject;
+    }
 }

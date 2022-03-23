@@ -4,12 +4,15 @@ import main.ChatRoom.ChatRoom;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
+
+import static java.lang.Integer.parseInt;
 
 public class ServerState {
     private static final Logger logger = Logger.getLogger(ServerState.class.getName());
@@ -68,9 +71,9 @@ public class ServerState {
                 String[] server_config_list = data.split("\\s+");
                 if (server_config_list[0].equals(server_id)){
                     this.server_address = server_config_list[1];
-                    this.client_port = Integer.parseInt(server_config_list[2]);
-                    this.coordination_port = Integer.parseInt(server_config_list[3]);
-                    this.self_id = Integer.parseInt(server_config_list[0].substring(1, 2));
+                    this.client_port = parseInt(server_config_list[2]);
+                    this.coordination_port = parseInt(server_config_list[3]);
+                    this.self_id = parseInt(server_config_list[0].substring(1, 2));
                 }
                 Server server = new Server(server_id, server_address, client_port, coordination_port);
                 ServerDictionary.put(server.getServer_id(), server);
@@ -187,6 +190,17 @@ public class ServerState {
         this.leaderServer = leader;
     }
 
+    public Server getLeader() {
+        return leaderServer;
+    }
+
+    public boolean isLeaderElected() {
+        if(leaderServer != null) {
+            return true;
+        }
+        return false;
+    }
+
     public ConcurrentHashMap<String, ChatRoom> getRoomMap() {
         return chatRoomDictionary;
     }
@@ -213,5 +227,34 @@ public class ServerState {
 
     public ConcurrentHashMap<String, Integer> getVote_set() {
         return voteSet;
+    }
+
+    public static void removeSuspectServer(String suspectServerId) {
+        if (ServerState.getServerState().getServerDictionary().containsKey(suspectServerId)) {
+            ServerState.getServerState().removeServer(suspectServerId);
+        }
+
+        if(ServerState.getServerState().getHeartbeatCount_list().containsKey(parseInt(suspectServerId))) {
+            ServerState.getServerState().removeServerInCountList(suspectServerId);
+        }
+
+        if(ServerState.getServerState().getSuspect_list().containsKey(parseInt(suspectServerId))) {
+            ServerState.getServerState().removeServerInSuspectList(suspectServerId);
+        }
+
+        ServerState.getServerState().otherServerChatRooms.entrySet().removeIf(stringStringEntry -> stringStringEntry.getValue().equals(suspectServerId));
+        ServerState.getServerState().otherServerUsers.entrySet().removeIf(stringStringEntry -> stringStringEntry.getValue().equals(suspectServerId));
+    }
+
+    public synchronized void removeServer(String serverId) {
+        ServerDictionary.remove(serverId);
+    }
+
+    public synchronized void removeServerInCountList(String serverId) {
+        heartbeatCountList.remove(parseInt(serverId));
+    }
+
+    public synchronized void removeServerInSuspectList(String serverName) {
+        suspectList.remove(parseInt(serverName));
     }
 }
