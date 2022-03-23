@@ -56,7 +56,7 @@ public class ChatRoom {
         this.clientStateMap.put(clientState.getClient_id(), clientState);
     }
 
-    public synchronized void removeParticipants(ClientState clientState) {
-        this.clientStateMap.remove(clientState.getClient_id());
+    public synchronized void removeParticipants(String clientId) {
+        this.clientStateMap.remove(clientId);
     }
 }

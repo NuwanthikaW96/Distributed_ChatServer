@@ -1,9 +1,12 @@
 package main.Server;
 
 import main.ChatRoom.ChatRoom;
+import main.Client.ClientThreadHandler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +32,8 @@ public class ServerState {
 
     private ConcurrentHashMap<String, String> otherServerChatRooms = new ConcurrentHashMap<String, String>();  // list of other avalibale servers and their chat rooms
     private ConcurrentHashMap<String, String> otherServerUsers = new ConcurrentHashMap<String, String>();  // list of all the users and their servers
+
+    private final ConcurrentHashMap<Long, ClientThreadHandler> clientHandlerThreadMap = new ConcurrentHashMap<>();
 
     private static ServerState serverStateInstance;
 
@@ -85,6 +90,44 @@ public class ServerState {
         }
         return false;
     }
+
+    public void addClientHandlerThreadToMap(ClientThreadHandler clientHandlerThread) {
+        clientHandlerThreadMap.put(clientHandlerThread.getId(), clientHandlerThread);
+    }
+
+    public ClientThreadHandler getClientHandlerThread(Long threadID) {
+        return clientHandlerThreadMap.get(threadID);
+    }
+
+    // used for updating leader client list when newly elected
+    public List<String> getClientIdList() {
+        List<String> clientIdList = new ArrayList<>();
+        chatRoomDictionary.forEach((roomID, room) -> {
+            clientIdList.addAll(room.getClientStateMap().keySet());
+        });
+        return clientIdList;
+    }
+
+    // used for updating leader chat room list when newly elected
+    public List<List<String>> getChatRoomList() {
+        // [ [clientID, roomID, serverID] ]
+        List<List<String>> chatRoomList = new ArrayList<>();
+        for (ChatRoom room: chatRoomDictionary.values()) {
+            List<String> roomInfo = new ArrayList<>();
+            roomInfo.add( room.getOwner());
+            roomInfo.add( room.getRoom_id() );
+            roomInfo.add( String.valueOf(room.getServer_id()) );
+
+            chatRoomList.add( roomInfo );
+        }
+        return chatRoomList;
+    }
+
+    public void removeClient (String clientID, String formerRoom, Long threadID){
+        this.chatRoomDictionary.get(formerRoom).removeParticipants(clientID);
+        this.clientHandlerThreadMap.remove(threadID);
+    }
+
 
     public String getServer_id() {
         return server_id;

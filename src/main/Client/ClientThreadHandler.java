@@ -19,6 +19,11 @@ import java.util.List;
 public class ClientThreadHandler extends Thread{
     private final Socket clientSocket;
     private ClientState clientState;
+    private String approvedClientId = "no";
+    private String approvedRoomCreation = "no";
+    private String approvedJoinRoom = "no";
+
+    private List<String> roomsListTemp;
 
     private DataOutputStream dataOutputStream;
 
@@ -27,6 +32,22 @@ public class ClientThreadHandler extends Thread{
         ServerState.getServerState().getChatRoomDictionary().put("MainHall" + serverId , ServerState.getServerState().getMainHall());
 
         this.clientSocket = clientSocket;
+    }
+
+    public void setRoomsListTemp(List<String> roomsListTemp) {
+        this.roomsListTemp = roomsListTemp;
+    }
+
+    public void setApprovedClientId(String approvedClientId) {
+        this.approvedClientId = approvedClientId;
+    }
+
+    public void setApprovedRoomCreation(String approvedRoomCreation) {
+        this.approvedRoomCreation = approvedRoomCreation;
+    }
+
+    public void setApprovedJoinRoom(String approvedJoinRoom) {
+        this.approvedJoinRoom = approvedJoinRoom;
     }
 
     private boolean hasKey(JSONObject jsonObject, String key){
@@ -96,7 +117,7 @@ public class ClientThreadHandler extends Thread{
         }
         else if (array[0].equals("message")){
             sendToClient = ServerMessage.getMessage(array[1], String.join(" ", Arrays.copyOfRange(array, 2, array.length)));
-            sendBroadCast(sendToClient, socketArrayList);;
+            sendBroadCast(sendToClient, socketArrayList);
         }
     }
 
@@ -135,27 +156,53 @@ public class ClientThreadHandler extends Thread{
     }
 
     private void newID(String clientID, Socket connected, String jsonStringFromClient) throws IOException {
-        if (checkID(clientID) && !ServerState.getServerState().isClientIDAlreadyTaken(clientID)){
-            System.out.println("INFO : Received correct ID ::" + jsonStringFromClient);
+        if(checkID(clientID)){
+            //wait for leader election
 
-            this.clientState = new ClientState(clientID, ServerState.getServerState().getMainHall().getRoom_id(),connected);
-            ServerState.getServerState().getMainHall().addParticipants(clientState);
+            //get approved by leader
 
-            synchronized (connected){
-                sendMessage(null, "newid true", null);
-                sendMessage(null, "roomchange" + clientID + "_" + "MainHall-"+ ServerState.getServerState().getServer_id(), null);
+            if (approvedClientId == "yes"){
+                System.out.println( "INFO : Received correct ID :" + clientID );
+                this.clientState = new ClientState(clientID, ServerState.getServerState().getMainHall().getRoom_id(), clientSocket);
+                ServerState.getServerState().getMainHall().addParticipants(clientState);
+
+                //check leader
+
+                String mainHallRoomId = ServerState.getServerState().getMainHall().getRoom_id();
+                HashMap<String, ClientState> mainHallClientList = ServerState.getServerState().getChatRoomDictionary().get(mainHallRoomId).getClientStateMap();
+                ArrayList<Socket> socketList = new ArrayList<>();
+                for (String each : mainHallClientList.keySet()){
+                    socketList.add(mainHallClientList.get(each).getSocket());
+                }
+
+                synchronized (connected){
+                    sendMessage(null, "newid true", null);
+                    sendMessage(null, "roomchange" + clientID + "_" + "MainHall-"+ ServerState.getServerState().getServer_id(), null);
+                }
+
+            }else if (approvedClientId == "neutral"){
+                System.out.println("WARN : ID already in use");
+                sendMessage(null, "newid false", null);
             }
+            approvedClientId = "no";
         }
         else{
-            System.out.println("WARN : Recieved wrong ID type or ID already in use");
+            System.out.println("WARN : Recieved wrong ID type");
             sendMessage(null, "newid false", null);
         }
     }
 
     private void list(Socket connected, String jsonStringFromClient) throws IOException {
-        List<String> roomsList = new ArrayList<>(ServerState.getServerState().getRoomMap().keySet());
-        System.out.println("INFO : rooms in the system :");
-        sendMessage(null,"roomlist", roomsList);
+        roomsListTemp = null;
+
+        //leader election
+
+        //leader make the list
+
+        if (roomsListTemp != null){
+            System.out.println("INFO : rooms in the system :");
+            sendMessage(null,"roomlist", roomsListTemp);
+        }
     }
 
     private void who(Socket connected, String jsomStringFromClient) throws IOException {
@@ -267,6 +314,23 @@ public class ClientThreadHandler extends Thread{
             }
         }
         sendMessage(roomList, "message "+ id + " " + content, null);
+    }
+
+    private void quit() throws IOException {
+        if (clientState.isOwner()){
+            deleteRoom(clientState.getRoom_id());
+            System.out.println("INFO : Deleted room before " + clientState.getClient_id() + " quit");
+        }
+        HashMap<String,ClientState> formerClientList = ServerState.getServerState().getChatRoomDictionary().get(clientState.getRoom_id()).getClientStateMap();
+        ArrayList<Socket> socketList = new ArrayList<>();
+        for (String each: formerClientList.keySet()){
+            socketList.add(formerClientList.get(each).getSocket());
+        }
+        sendMessage(socketList, "quit", null);
+
+        ServerState.getServerState();
+
+
     }
 
     @Override
