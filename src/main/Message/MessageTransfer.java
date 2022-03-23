@@ -47,4 +47,7 @@ public class MessageTransfer {
             dataOutputStream.flush();
         }
     }
+    public static boolean hasKey(JSONObject jsonObject, String key) {
+        return (jsonObject != null && jsonObject.get(key) != null);
+    }
 }

@@ -50,7 +50,7 @@ public class LeaderState {
     public void removeRemoteChatRoomsClientsByServerId(Integer serverId) {
         for (String entry : activeChatRooms.keySet()) {
             ChatRoom remoteRoom = activeChatRooms.get(entry);
-            if(remoteRoom.getServer_id()==serverId){
+            if(remoteRoom.getServer_id()==Integer.toString(serverId)){
                 for(String client : remoteRoom.getClientStateMap().keySet()){
                     activeClientsList.remove(client);
                 }
