@@ -1,7 +1,6 @@
 package main.Leader;
 
 import main.Messaging.Sender;
-import main.Heartbeat.Heartbeat;
 import main.Server.Server;
 import main.Server.ServerState;
 
