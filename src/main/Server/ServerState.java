@@ -257,4 +257,11 @@ public class ServerState {
     public ConcurrentHashMap<String, Integer> getVote_set() {
         return voteSet;
     }
+
+    public String getMainHallID() {
+        return getMainHallIDbyServerInt(this.self_id);
+    }
+    public static String getMainHallIDbyServerInt(int server) {
+        return "MainHall-s" + server;
+    }
 }

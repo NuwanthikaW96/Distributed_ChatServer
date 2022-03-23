@@ -12,7 +12,7 @@ import org.json.simple.JSONObject;
 import java.util.List;
 
 public class LeaderStateUpdate extends Thread {
-    int numberOfServersWithLowerIds = ServerState.getServerState().getSelfID() - 1;
+    int numberOfServersWithLowerIds = ServerState.getServerState().getSelf_id() - 1;
     int numberOfUpdatesReceived = 0;
     volatile boolean leaderUpdateInProgress = true;
 

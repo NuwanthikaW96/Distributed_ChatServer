@@ -412,6 +412,48 @@ public class ClientThreadHandler extends Thread{
             approvedJoinRoom = -1;
         }
     }
+
+    private void moveJoin(String roomID, String formerRoomID, String clientID) throws IOException, InterruptedException {
+        roomID = (ServerState.getServerState().getRoomMap().containsKey(roomID))? roomID:ServerState.getServerState().getMainHallID();
+        this.clientState = new ClientState(clientID, roomID, clientSocket);
+        ServerState.getServerState().getRoomMap().get(roomID).addParticipants(clientState);
+
+        //create broadcast list
+        HashMap<String, ClientState> clientListNew = ServerState.getServerState().getRoomMap().get(roomID).getClientStateMap();
+
+        ArrayList<Socket> SocketList = new ArrayList<>();
+        for (String each : clientListNew.keySet()) {
+            SocketList.add(clientListNew.get(each).getSocket());
+        }
+
+
+
+//        messageSend(null, msgCtx.setMessageType(CLIENT_MSG_TYPE.SERVER_CHANGE));
+//        messageSend(SocketList, msgCtx.setMessageType(CLIENT_MSG_TYPE.BROADCAST_JOIN_ROOM));
+
+
+        while (!LeaderState.getLeaderState().isLeaderElected()) {
+            Thread.sleep(1000);
+        }
+
+        //if self is leader update leader state directly
+        if (LeaderState.getLeaderState().isLeader()) {
+            ClientState client = new ClientState(clientID, roomID, null);
+            LeaderState.getLeaderState().clientAdd(client);
+        } else {
+            //update leader server
+            MessageTransfer.sendToLeader(
+                    ServerMessage.getMoveJoinRequest(
+                            clientState.getClient_id(),
+                            roomID,
+                            formerRoomID,
+                            String.valueOf(ServerState.getServerState().getSelf_id()),
+                            String.valueOf(this.getId())
+                    )
+            );
+        }
+
+    }
     private void message(String content, Socket connected, String fromClient) throws IOException {
         String id = clientState.getClient_id();
         String roomId = clientState.getRoom_id();

@@ -149,5 +149,16 @@ public class ServerMessage {
         jsonObject.put("isLocalRoomChange", isLocalRoomChange);
         return jsonObject;
     }
+    @SuppressWarnings("unchecked")
+    public static JSONObject getMoveJoinRequest(String clientID, String roomID, String formerRoomID, String sender, String threadID) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "movejoinack");
+        jsonObject.put("sender", sender);
+        jsonObject.put("roomid", roomID);
+        jsonObject.put("former", formerRoomID);
+        jsonObject.put("clientid", clientID);
+        jsonObject.put("threadid", threadID);
+        return jsonObject;
+    }
 }
 
