@@ -7,13 +7,13 @@ import java.util.HashMap;
 public class ChatRoom {
     private String room_id;
     private String owner;
-    private String server_id;
+    private int server_id;
 
     ArrayList<ClientState> client_list = new ArrayList<ClientState>();
     private final HashMap<String, ClientState> clientStateMap = new HashMap<>();
 
 
-    public ChatRoom(String room_id, String server_id) {
+    public ChatRoom(String owner,String room_id, int server_id) {
         this.room_id = room_id;
         this.owner = owner;
         this.server_id = server_id;

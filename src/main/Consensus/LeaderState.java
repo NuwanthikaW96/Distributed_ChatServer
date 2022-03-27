@@ -117,7 +117,14 @@ public class LeaderState {
         activeChatRooms.get(formerRoomID).removeParticipants(clientID);
     }
 
-    public void addApprovedRoom(String clientID, String roomID, int sender) {
+    public void addApprovedRoom(String clientID, String roomID, int serverID) {
+        ChatRoom room = new ChatRoom(clientID, roomID, serverID);
+        activeChatRooms.put(roomID, room);
+
+        //add client to the new room
+        ClientState clientState = new ClientState(clientID, roomID, null);
+        clientState.setOwner(true);
+        room.addParticipants(clientState);
     }
 
     public Object getRoomIDList() {

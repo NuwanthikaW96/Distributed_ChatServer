@@ -50,8 +50,8 @@ public class ServerState {
 
     public ServerState(){}
 
-    public static String getMainHallIDbyServerInt(int sender) {
-    }
+//    public static String getMainHallIDbyServerInt(int sender) {
+//    }
 
     public ChatRoom getMainHall() {
         return mainHall;

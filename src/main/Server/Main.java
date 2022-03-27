@@ -26,8 +26,9 @@ public class Main {
 
     public static void main(String[] args) {
 
-        System.out.println("LOG  : ------server started------");
         ServerState.getServerState().serverInitializeWithConfig("s1", "D:\\Sem 8\\Distributed system\\ChatServer\\src\\main\\config\\server_config.txt");
+        System.out.println("LOG  : ------server started------");
+
         try {
 
             if( ServerState.getServerState().getServer_address() == null ) {
@@ -35,18 +36,19 @@ public class Main {
             }
 
 //          server socket for coordination
-            ServerSocket CoordinatorServerSocket = new ServerSocket();
+            ServerSocket coordinatorServerSocket = new ServerSocket();
 
 //          bind SocketAddress with inetAddress and port
             SocketAddress endPointCoordination = new InetSocketAddress(
-                    ServerState.getServerState().getServer_address(),
+                    "0.0.0.0",//ServerState.getInstance().getServerAddress()
                     ServerState.getServerState().getCoordination_port()
             );
 
-            CoordinatorServerSocket.bind(endPointCoordination);
-            System.out.println(CoordinatorServerSocket.getLocalSocketAddress());
-            System.out.println("LOG  : TCP Server waiting for coordination on port "+
-                    CoordinatorServerSocket.getLocalPort());
+            coordinatorServerSocket.bind( endPointCoordination );
+            System.out.println( coordinatorServerSocket.getLocalSocketAddress() );
+            System.out.println( "LOG  : TCP Server waiting for coordination on port " +
+                    coordinatorServerSocket.getLocalPort() ); // port open for coordination
+
 
             // port open for coordination server socket for client
             ServerSocket ClientServerSocket = new ServerSocket();
@@ -75,6 +77,10 @@ public class Main {
         }catch (IOException e) {
             e.printStackTrace();
         }
+
+        ServerHandler serverHandler = new ServerHandler(coordinatorServerSocket);
+
+        serverHandler.start();
 
         Runnable heartbeat = new Heartbeat("Heartbeat");
         new Thread(heartbeat).start();

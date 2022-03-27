@@ -2,11 +2,11 @@ package main.Server;
 
 import java.io.*;
 
-import main.Client.ClientThreadHandler
+import main.Client.ClientThreadHandler;
 import main.Client.ClientState;
-
-
 import main.Consensus.LeaderState;
+import main.Heartbeat.Consensus;
+import main.Heartbeat.Gossiping;
 import main.Leader.FastBully;
 import main.Message.MessageTransfer;
 import main.Message.ServerMessage;
@@ -23,11 +23,6 @@ public class ServerHandler extends Thread {
 
     private final ServerSocket serverCoordinationSocket;
 
-
-
-    public ServerHandler(ServerSocket serverCoordinationSocket) {
-        this.serverCoordinationSocket = serverCoordinationSocket;
-    }
 
     public ServerHandler(ServerSocket serverCoordinationSocket) {
         this.serverCoordinationSocket = serverCoordinationSocket;
@@ -88,8 +83,7 @@ public class ServerHandler extends Thread {
                         boolean approved = !LeaderState.getLeaderState().isClientIDAlreadyTaken(clientID);
                         if (approved) {
                             ClientState clientState = new ClientState(clientID,
-                                    ServerState.getMainHallIDbyServerInt(sender),
-                                    null);
+                                    ServerState.getMainHallIDbyServerInt(sender),null);
                             LeaderState.getLeaderState().addClient(clientState);
                         }
                         Server destServer = ServerState.getServerState().getServers()
@@ -110,7 +104,7 @@ public class ServerHandler extends Thread {
                             && j_object.get("approved") != null && j_object.get("threadid") != null) {
 
                         // non leader processes client ID approval request reply received
-                        int approved = Boolean.parseBoolean(j_object.get("approved").toString()) ? 1 : 0;
+                        String approved = Boolean.parseBoolean(j_object.get("approved").toString()) ? "yes" : "neutral";
                         Long threadID = Long.parseLong(j_object.get("threadid").toString());
 
                         ClientThreadHandler clientHandlerThread = ServerState.getServerState()
@@ -133,7 +127,7 @@ public class ServerHandler extends Thread {
                         boolean approved = LeaderState.getLeaderState().isRoomCreationApproved(roomID);
 
                         if (approved) {
-                            LeaderState.getLeaderState().addApprovedRoom(clientID, roomID, sender1);
+                            LeaderState.getLeaderState().addApprovedRoom(clientID, roomID, sender);
                         }
                         Server destServer = ServerState.getServerState().getServers()
                                 .get(sender);
@@ -152,12 +146,12 @@ public class ServerHandler extends Thread {
                     } else if (j_object.get("type").equals("roomcreateapprovalreply")) {
 
                         // non leader processes room create approval request reply received
-                        int approved = Boolean.parseBoolean(j_object.get("approved").toString()) ? 1 : 0;
+                        String approved = Boolean.parseBoolean(j_object.get("approved").toString()) ? "yes" : "neutral";
                         Long threadID = Long.parseLong(j_object.get("threadid").toString());
 
                         ClientThreadHandler clientHandlerThread = ServerState.getServerState()
                                 .getClientHandlerThread(threadID);
-                        clientHandlerThread.setApprovedRoomCreation(Integer.parseInt(approved).t);
+                        clientHandlerThread.setApprovedRoomCreation(approved);
                         Object lock = clientHandlerThread.getLock();
                         synchronized (lock) {
                             lock.notifyAll();
@@ -286,16 +280,16 @@ public class ServerHandler extends Thread {
                         System.out.println("INFO : Client '" + clientID + "' deleted by leader");
 
                     } else if (j_object.get("type").equals("gossip")) {
-                        GossipJob.receiveMessages(j_object);
+                        Gossiping.receiveMessages(j_object);
 
                     } else if (j_object.get("type").equals("startVote")) {
-                        ConsensusJob.startVoteMessageHandler(j_object);
+                        Consensus.startVoteMessageHandler(j_object);
 
                     } else if (j_object.get("type").equals("answervote")) {
-                        ConsensusJob.answerVoteHandler(j_object);
+                        Consensus.answerVoteHandler(j_object);
 
                     } else if (j_object.get("type").equals("notifyserverdown")) {
-                        ConsensusJob.notifyServerDownMessageHandler(j_object);
+                        Consensus.notifyServerDownMessageHandler(j_object);
 
                     } else {
                         System.out.println("WARN : Command error, Corrupted JSON from Server");
