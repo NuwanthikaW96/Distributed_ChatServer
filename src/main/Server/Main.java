@@ -35,31 +35,33 @@ public class Main {
             }
 
 //          server socket for coordination
-            ServerSocket CoordinatorServerSocket = new ServerSocket();
+            ServerSocket coordinatorServerSocket = new ServerSocket();
 
 //          bind SocketAddress with inetAddress and port
             SocketAddress endPointCoordination = new InetSocketAddress(
-                    ServerState.getServerState().getServer_address(),
+                    "0.0.0.0",//ServerState.getServerState().getServer_address(),
                     ServerState.getServerState().getCoordination_port()
             );
 
-            CoordinatorServerSocket.bind(endPointCoordination);
-            System.out.println(CoordinatorServerSocket.getLocalSocketAddress());
+            coordinatorServerSocket.bind(endPointCoordination);
+            System.out.println(coordinatorServerSocket.getLocalSocketAddress());
             System.out.println("LOG  : TCP Server waiting for coordination on port "+
-                    CoordinatorServerSocket.getLocalPort());
+                    coordinatorServerSocket.getLocalPort());
 
             // port open for coordination server socket for client
             ServerSocket ClientServerSocket = new ServerSocket();
 
             // bind SocketAddress with inetAddress and port
             SocketAddress endPointClient = new InetSocketAddress(
-                    ServerState.getServerState().getServer_address(),
+                    "0.0.0.0",//ServerState.getServerState().getServer_address(),
                     ServerState.getServerState().getClient_port()
             );
             ClientServerSocket.bind(endPointClient);
             System.out.println(ClientServerSocket.getLocalSocketAddress());
             System.out.println("LOG  : TCP Server waiting for clients on port "+
                     ClientServerSocket.getLocalPort()); // port open for clients
+
+            ServerHandler serverHandler = new ServerHandler(coordinatorServerSocket);
 
 //            while (true) {
 //                Socket clientSocket = ClientServerSocket.accept();

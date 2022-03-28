@@ -29,9 +29,6 @@ public class ServerHandler extends Thread {
         this.serverCoordinationSocket = serverCoordinationSocket;
     }
 
-    public ServerHandler(ServerSocket serverCoordinationSocket) {
-        this.serverCoordinationSocket = serverCoordinationSocket;
-    }
 
     @Override
     public void run() {
