@@ -70,6 +70,7 @@ public class ServerState {
     }
 
     public void serverInitializeWithConfig(String server_id, String config_file_path){
+        this.server_id = server_id;
         try{
             File configFile = new File(config_file_path);
             Scanner scanner = new Scanner(configFile);
@@ -93,7 +94,7 @@ public class ServerState {
             System.out.println("Config file not found");
             e.printStackTrace();
         }
-        this.mainHall = new ChatRoom("MainHall-" + server_id , "default-" + server_id,server_id);
+        this.mainHall = new ChatRoom("", getMainHallID(), server_id);
         this.chatRoomDictionary.put("MainHall-" + server_id, mainHall);
     }
 

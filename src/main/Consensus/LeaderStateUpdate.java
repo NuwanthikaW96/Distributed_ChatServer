@@ -39,7 +39,7 @@ public class LeaderStateUpdate extends Thread {
 
                     for( List<String> chatRoom : selfRooms ) {
                         LeaderState.getLeaderState().addApprovedRoom( chatRoom.get( 0 ),
-                                chatRoom.get( 1 ), Integer.parseInt(chatRoom.get( 2 )) );
+                                chatRoom.get( 1 ), chatRoom.get( 2 )) ;
                     }
                     System.out.println("INFO : Finalized clients: " + LeaderState.getLeaderState().getClientIDList() +
                             ", rooms: " + LeaderState.getLeaderState().getRoomIDList());
@@ -51,7 +51,7 @@ public class LeaderStateUpdate extends Thread {
 
                             try {
                                 MessageTransfer.sendServer(
-                                        ServerMessage.getLeaderStateUpdateComplete( String.valueOf(ServerState.getServerState().getSelfID()) ),
+                                        ServerMessage.getLeaderStateUpdateComplete(ServerState.getServerState().getServer_id()),
                                         destServer
                                 );
                                 System.out.println("INFO : Sent leader update complete message to s"+destServer.getServer_id());
@@ -86,7 +86,7 @@ public class LeaderStateUpdate extends Thread {
         for( Object chatRoom : chatRoomsList ) {
             JSONObject j_room = (JSONObject)chatRoom;
             LeaderState.getLeaderState().addApprovedRoom( j_room.get("clientid").toString(),
-                    j_room.get("roomid").toString(), Integer.parseInt(j_room.get("serverid").toString()) );
+                    j_room.get("roomid").toString(), j_room.get("serverid").toString());
         }
     }
 }

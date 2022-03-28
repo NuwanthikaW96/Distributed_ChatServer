@@ -44,7 +44,7 @@ public class LeaderState {
         return leader_id;
     }
 
-    public void setLeader_id( int leader_id ) {
+    public void setLeader_id(int leader_id) {
         this.leader_id = leader_id;
     }
 
@@ -52,8 +52,8 @@ public class LeaderState {
     public void removeRemoteChatRoomsClientsByServerId(Integer serverId) {
         for (String entry : activeChatRooms.keySet()) {
             ChatRoom remoteRoom = activeChatRooms.get(entry);
-            if(remoteRoom.getServer_id()==Integer.toString(serverId)){
-                for(String client : remoteRoom.getClientStateMap().keySet()){
+            if (remoteRoom.getServer_id() == Integer.toString(serverId)) {
+                for (String client : remoteRoom.getClientStateMap().keySet()) {
                     activeClientsList.remove(client);
                 }
                 activeChatRooms.remove(entry);
@@ -70,8 +70,12 @@ public class LeaderState {
         activeChatRooms.get(client.getRoom_id()).addParticipants(client);
     }
 
-    public boolean isRoomCreationApproved( String roomID ) {
-        return !(activeChatRooms.containsKey( roomID ));
+    public void addClientLeaderUpdate(String clientID) {
+        activeClientsList.add(clientID);
+    }
+
+    public boolean isRoomCreationApproved(String roomID) {
+        return !(activeChatRooms.containsKey(roomID));
     }
 
     public void localJoinRoomClient(ClientState clientState, String formerRoomID) {
@@ -107,17 +111,18 @@ public class LeaderState {
         formerClientStateMap.get(ownerID).setOwner(false);
         this.activeChatRooms.remove(roomID);
     }
+
     public void clientAdd(ClientState client) {
         activeClientsList.add(client.getClient_id());
         activeChatRooms.get(client.getRoom_id()).addParticipants(client);
     }
 
-    public void clientRemove (String clientID, String formerRoomID) {
+    public void clientRemove(String clientID, String formerRoomID) {
         activeClientsList.remove(clientID);
         activeChatRooms.get(formerRoomID).removeParticipants(clientID);
     }
 
-    public void addApprovedRoom(String clientID, String roomID, int serverID) {
+    public void addApprovedRoom(String clientID, String roomID, String serverID) {
         ChatRoom room = new ChatRoom(clientID, roomID, serverID);
         activeChatRooms.put(roomID, room);
 
@@ -127,12 +132,10 @@ public class LeaderState {
         room.addParticipants(clientState);
     }
 
-    public Object getRoomIDList() {
-
-    public void localJoinRoomClient(ClientState clientState, String formerRoomID) {
-        clientRemove(clientState.getClient_id(), formerRoomID);
-        clientAdd(clientState);
+    public ArrayList<String> getRoomIDList() {
+        return new ArrayList<>(this.activeChatRooms.keySet());
     }
+
     public int getServerIDIfRoomExist(String roomID) {
         if (this.activeChatRooms.containsKey(roomID)) {
             ChatRoom targetRoom = activeChatRooms.get(roomID);
@@ -140,5 +143,9 @@ public class LeaderState {
         } else {
             return -1;
         }
+    }
+
+    public List<String> getClientIDList() {
+        return activeClientsList;
     }
 }

@@ -148,7 +148,7 @@ public class ClientThreadHandler extends Thread{
             }
             ServerState.getServerState().getRoomMap().get(formerRoomId).removeParticipants(clientState.getClient_id());
 
-            ChatRoom newRoom = new ChatRoom(clientState.getClient_id(), newRoomId);
+            ChatRoom newRoom = new ChatRoom(clientState.getClient_id(), newRoomId, ServerState.getServerState().getServer_id());
             ServerState.getServerState().getRoomMap().put(newRoomId, newRoom);
 
             clientState.setRoom_id(newRoomId);
@@ -551,6 +551,7 @@ public class ClientThreadHandler extends Thread{
     }
 
     public Object getLock() {
+        return lock;
     }
 
     public void setApprovedJoinRoomServerHostAddress(String host) {

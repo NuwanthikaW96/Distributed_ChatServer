@@ -161,16 +161,51 @@ public class ServerMessage {
         return jsonObject;
     }
 
-    public static JSONObject getClientIdApprovalReply(String valueOf, String threadID) {
+    public static JSONObject getClientIdApprovalReply(String approved, String threadID) {
+        // {"type" : "clientidapprovalreply", "approved" : "1", "threadid" : "10"}
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "clientidapprovalreply");
+        jsonObject.put("approved", approved);
+        jsonObject.put("threadid", threadID);
+        return jsonObject;
     }
 
-    public static JSONObject getRoomCreateApprovalReply(String valueOf, String threadID) {
+    public static JSONObject getRoomCreateApprovalReply(String approved, String threadID) {
+        // {"type" : "roomcreateapprovalreply", "approved" : "1", "threadid" : "10"}
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "roomcreateapprovalreply");
+        jsonObject.put("approved", approved);
+        jsonObject.put("threadid", threadID);
+        return jsonObject;
+
     }
 
-    public static JSONObject getJoinRoomApprovalReply(String valueOf, String threadID, String host, String port) {
+    public static JSONObject getJoinRoomApprovalReply(String approved, String threadID, String host, String port) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "joinroomapprovalreply");
+        jsonObject.put("approved", approved);
+        jsonObject.put("host", host);
+        jsonObject.put("port", port);
+        jsonObject.put("threadid", threadID);
+        return jsonObject;
     }
 
     public static JSONObject getListResponse(Object roomIDList, String threadID) {
+        // {"type" : "listresponse", "rooms" : ["room-1","MainHall-s1","MainHall-s2"], "threadid" : 12 }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "listresponse");
+        jsonObject.put("threadid", threadID);
+        jsonObject.put("rooms", roomIDList);
+        return jsonObject;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONObject getLeaderStateUpdateComplete(String serverID) {
+        // {"type" : "leaderstateupdatecomplete", "serverid" : "s3"}
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "leaderstateupdatecomplete");
+        jsonObject.put("serverid", serverID);
+        return jsonObject;
     }
 }
 

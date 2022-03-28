@@ -120,8 +120,8 @@ public class ServerHandler extends Thread {
                         // leader processes room create approval request received
                         String clientID = j_object.get("clientid").toString();
                         String roomID = j_object.get("roomid").toString();
-                        int sender = Integer.parseInt(j_object.get("sender").toString());
-                        String sender1 = j_object.get("sender").toString();
+                        String sender = (j_object.get("sender").toString());
+                        //String sender1 = j_object.get("sender").toString();
                         String threadID = j_object.get("threadid").toString();
 
                         boolean approved = LeaderState.getLeaderState().isRoomCreationApproved(roomID);
