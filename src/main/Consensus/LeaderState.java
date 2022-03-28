@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import main.Client.ClientState;
 import main.ChatRoom.ChatRoom;
 import main.Server.ServerState;
 
@@ -55,6 +56,11 @@ public class LeaderState {
         this.leader_id = leader_id;
     }
 
+    public void removeClient(String clientID, String formerRoomID) {
+        activeClientsList.remove(clientID);
+        activeChatRooms.get(formerRoomID).removeParticipants(clientID);
+    }
+
     //Remove all rooms and clients by server ID
     public void removeRemoteChatRoomsClientsByServerId(Integer serverId) {
         for (String entry : activeChatRooms.keySet()) {
@@ -67,6 +73,16 @@ public class LeaderState {
             }
         }
 
+    }
+
+    public void addClient(ClientState client) {
+        activeClientsList.add(client.getClient_id());
+        activeChatRooms.get(client.getRoom_id()).addParticipants(client);
+    }
+
+    public void localJoinRoomClient(ClientState clientState, String formerRoomID) {
+        removeClient(clientState.getClient_id(), formerRoomID);
+        addClient(clientState);
     }
 
 }

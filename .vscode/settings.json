@@ -1,0 +1,7 @@
+{
+                        "java.project.referencedLibraries": [
+                                                "lib/**/*.jar",
+                                                "c:\\Users\\ADF\\Downloads\\json-simple-1.1.jar",
+                                                "c:\\Users\\ADF\\Downloads\\quartz-2.1.7.jar"
+                        ]
+}

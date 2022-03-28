@@ -330,7 +330,7 @@ public class ClientThreadHandler extends Thread{
 
                 if (approvedJoinRoom == 1) {
                     Server targetRoomServer = ServerState.getServerState().getServers().get(targetRoomServerID);
-                    serverHostAddressOfApprovedJoinRoom = targetRoomServer.getServer_address();
+                    serverHostAddressOfApprovedJoinRoom = targetRoomServer.getServer_id();
                     serverPortOfApprovedJoinRoom = String.valueOf(targetRoomServer.getClient_port());
                 }
 

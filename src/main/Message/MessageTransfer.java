@@ -32,7 +32,7 @@ public class MessageTransfer {
     public static void sendServer( JSONObject obj, Server destServer) throws IOException
     {
         Socket socket = new Socket(destServer.getServer_address(),
-                destServer.getCordination_port());
+                destServer.getCoordination_port());
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         dataOutputStream.write((obj.toJSONString() + "\n").getBytes( StandardCharsets.UTF_8));
         dataOutputStream.flush();
@@ -41,7 +41,7 @@ public class MessageTransfer {
     //Sending broadcast message
     public static void sendServerBroadcast(JSONObject obj, ArrayList<Server> serverList) throws IOException {
         for (Server each : serverList) {
-            Socket socket = new Socket(each.getServer_address(), each.getCordination_port());
+            Socket socket = new Socket(each.getServer_address(), each.getCoordination_port());
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataOutputStream.write((obj.toJSONString() + "\n").getBytes( StandardCharsets.UTF_8));
             dataOutputStream.flush();
