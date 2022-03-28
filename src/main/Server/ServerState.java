@@ -93,7 +93,7 @@ public class ServerState {
             System.out.println("Config file not found");
             e.printStackTrace();
         }
-        this.mainHall = new ChatRoom("MainHall-" + server_id , "default-" + server_id);
+        this.mainHall = new ChatRoom("MainHall-" + server_id , "default-" + server_id,server_id);
         this.chatRoomDictionary.put("MainHall-" + server_id, mainHall);
     }
 
