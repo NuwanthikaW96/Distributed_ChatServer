@@ -27,8 +27,6 @@ public class LeaderStateUpdate extends Thread {
                     leaderUpdateInProgress = false;
                     System.out.println("INFO : Leader update completed");
 
-                    BullyAlgorithm.leaderUpdateComplete = true;
-
                     // add self clients and chat rooms to leader state
                     List<String> selfClients = ServerState.getServerState().getClientIdList();
                     List<List<String>> selfRooms = ServerState.getServerState().getChatRoomList();

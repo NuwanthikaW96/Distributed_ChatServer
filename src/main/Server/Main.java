@@ -1,5 +1,6 @@
 package main.Server;
 
+import main.Client.ClientThreadHandler;
 import main.Heartbeat.Gossiping;
 import main.Heartbeat.Consensus;
 import main.Heartbeat.Heartbeat;
@@ -31,7 +32,7 @@ public class Main {
 
         try {
 
-            if( ServerState.getServerState().getServer_address() == null ) {
+            if (ServerState.getServerState().getServer_address() == null) {
                 throw new IllegalArgumentException();
             }
 
@@ -44,10 +45,10 @@ public class Main {
                     ServerState.getServerState().getCoordination_port()
             );
 
-            coordinatorServerSocket.bind( endPointCoordination );
-            System.out.println( coordinatorServerSocket.getLocalSocketAddress() );
-            System.out.println( "LOG  : TCP Server waiting for coordination on port " +
-                    coordinatorServerSocket.getLocalPort() ); // port open for coordination
+            coordinatorServerSocket.bind(endPointCoordination);
+            System.out.println(coordinatorServerSocket.getLocalSocketAddress());
+            System.out.println("LOG  : TCP Server waiting for coordination on port " +
+                    coordinatorServerSocket.getLocalPort()); // port open for coordination
 
 
             // port open for coordination server socket for client
@@ -60,39 +61,42 @@ public class Main {
             );
             ClientServerSocket.bind(endPointClient);
             System.out.println(ClientServerSocket.getLocalSocketAddress());
-            System.out.println("LOG  : TCP Server waiting for clients on port "+
+            System.out.println("LOG  : TCP Server waiting for clients on port " +
                     ClientServerSocket.getLocalPort()); // port open for clients
 
-//            while (true) {
-//                Socket clientSocket = ClientServerSocket.accept();
-//                ClientHandlerThread clientHandlerThread = new ClientHandlerThread(clientSocket);
-//                // starting the thread
-//                ServerState.getServerState().addClientHandlerThreadToList(clientHandlerThread);
-//                clientHandlerThread.start();
+            ServerHandler serverHandler = new ServerHandler(coordinatorServerSocket);
+
+            serverHandler.start();
+
+            Runnable heartbeat = new Heartbeat("Heartbeat");
+            new Thread(heartbeat).start();
+
+            if (isGossip) {
+                System.out.println("Failure Detection is running GOSSIP mode");
+                startGossip();
+                startConsensus();
+            }
+
+            while (true) {
+                Socket clientSocket = ClientServerSocket.accept();
+                ClientThreadHandler clientHandlerThread = new ClientThreadHandler(clientSocket);
+                // starting the thread
+                ServerState.getServerState().addClientHandlerThreadToMap(clientHandlerThread);
+                clientHandlerThread.start();
 //            }
 
-        }
-        catch( IllegalArgumentException e ) {
+            }
+        } catch (IllegalArgumentException e) {
             System.out.println("ERROR : invalid server ID");
-        }catch (IOException e) {
+        } catch (IndexOutOfBoundsException  e) {
+            System.out.println("ERROR : server arguments not provided");
             e.printStackTrace();
-        }
-
-        ServerHandler serverHandler = new ServerHandler(coordinatorServerSocket);
-
-        serverHandler.start();
-
-        Runnable heartbeat = new Heartbeat("Heartbeat");
-        new Thread(heartbeat).start();
-
-        if (isGossip) {
-            System.out.println("Failure Detection is running GOSSIP mode");
-            startGossip();
-            startConsensus();
+        } catch (IOException e) {
+            System.out.println("ERROR : occurred in main " + Arrays.toString(e.getStackTrace()));
         }
     }
 
-    private static void startGossip() {
+        private static void startGossip() {
         try {
 
             JobDetail gossipJob = JobBuilder.newJob(Gossiping.class)
