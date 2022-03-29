@@ -39,7 +39,7 @@ public class ClientThreadHandler extends Thread{
     public ClientThreadHandler(Socket clientSocket) {
         String serverId = ServerState.getServerState().getServer_id();
         ServerState.getServerState().getChatRoomDictionary().put("MainHall" + serverId , ServerState.getServerState().getMainHall());
-
+        this.roomsListTemp = new ArrayList<>();
         this.clientSocket = clientSocket;
     }
 
@@ -93,6 +93,8 @@ public class ClientThreadHandler extends Thread{
     private void sendMessage(ArrayList<Socket> socketArrayList, String msg, List<String> msgList) throws IOException {
         JSONObject sendToClient = new JSONObject();
         String[] array = msg.split(" ");
+        System.out.println("------------");
+        System.out.println(Arrays.toString(array));
 
 
         if(array[0].equals("newid")){
@@ -127,11 +129,21 @@ public class ClientThreadHandler extends Thread{
             sendToClient = ServerMessage.getMessage(array[1], String.join(" ", Arrays.copyOfRange(array, 2, array.length)));
             sendBroadCast(sendToClient, socketArrayList);
         }
+        else if (array[0].equals("roomchangeall")){
+            sendToClient = ServerMessage.getCreateRoomChange(array[1], array[2], array[3]);
+            sendBroadCast(sendToClient, socketArrayList);
+        }
+        else if (array[0].equals("quit")){
+            sendToClient = ServerMessage.getCreateRoomChange(array[1], "", "" );
+            send(sendToClient);
+        }
     }
 
     private void createRoom(String newRoomId, Socket connected, String jsonStringFromClient) throws IOException {
 
         // TODO:Leader election
+        approvedRoomCreation = "yes";
+
 
         if(approvedRoomCreation=="yes"){
             System.out.println("INFO : Received correct room ID ::" + jsonStringFromClient);
@@ -212,12 +224,14 @@ public class ClientThreadHandler extends Thread{
     }
 
     private void list(Socket connected, String jsonStringFromClient) throws IOException {
-        roomsListTemp = null;
+        //roomsListTemp = null;
 
         //leader election
 
         //leader make the list
-
+        roomsListTemp.add("A");
+        roomsListTemp.add("B");
+        System.out.println(roomsListTemp);
         if (roomsListTemp != null){
             System.out.println("INFO : rooms in the system :");
             sendMessage(null,"roomlist", roomsListTemp);
@@ -466,6 +480,7 @@ public class ClientThreadHandler extends Thread{
     }
 
     private void quit() throws IOException {
+        System.out.println("hiiiiii");
         if (clientState.isOwner()){
             deleteRoom(clientState.getRoom_id());
             System.out.println("INFO : Deleted room before " + clientState.getClient_id() + " quit");
@@ -475,7 +490,7 @@ public class ClientThreadHandler extends Thread{
         for (String each: formerClientList.keySet()){
             socketList.add(formerClientList.get(each).getSocket());
         }
-        sendMessage(socketList, "quit", null);
+        sendMessage(socketList, "quit " + clientState.getClient_id(), null);
 
         ServerState.getServerState();
 
@@ -530,6 +545,10 @@ public class ClientThreadHandler extends Thread{
                         if (jsonObject.get("type").equals("message")) {
                             String content = jsonObject.get("content").toString();
                             message(content, clientSocket, jsonStringFromClient);
+                        }
+                        if (jsonObject.get("type").equals("quit")) {
+
+                            quit();
                         }
                     }
                     else {
