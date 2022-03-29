@@ -94,12 +94,13 @@ public class ClientThreadHandler extends Thread{
         JSONObject sendToClient = new JSONObject();
         String[] array = msg.split(" ");
 
+
         if(array[0].equals("newid")){
             sendToClient = ServerMessage.getApprovalNewID(array[1]);
             send(sendToClient);
         }
         else if (array[0].equals("roomchange")){
-            sendToClient = ServerMessage.getCreateRoomChange(array[1], array[2].replace("_",""), array[3]);
+            sendToClient = ServerMessage.getCreateRoomChange(array[1], "", array[2]);
             send(sendToClient);
         }
         else if (array[0].equals("createroom")){
@@ -177,6 +178,7 @@ public class ClientThreadHandler extends Thread{
             //wait for leader election
 
             //get approved by leader
+            approvedClient_id = "yes";
 
             if (approvedClient_id == "yes"){
                 System.out.println( "INFO : Received correct ID :" + clientID );
@@ -194,7 +196,7 @@ public class ClientThreadHandler extends Thread{
 
                 synchronized (connected){
                     sendMessage(null, "newid true", null);
-                    sendMessage(null, "roomchange" + clientID + "_" + "MainHall-"+ ServerState.getServerState().getServer_id(), null);
+                    sendMessage(null, "roomchange " + clientID + " " + "MainHall-"+ ServerState.getServerState().getServer_id(), null);
                 }
 
             }else if (approvedClient_id == "neutral"){

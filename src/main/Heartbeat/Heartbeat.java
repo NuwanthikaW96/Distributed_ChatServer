@@ -23,7 +23,7 @@ public class Heartbeat implements Runnable{
 
     @Override
     public void run() {
-        System.out.println("heartbeat");
+        //ystem.out.println("heartbeat");
         switch(operation) {
             case "heartbeat":
                 while(this.active) {

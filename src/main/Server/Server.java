@@ -15,7 +15,7 @@ public class Server {
         this.server_address = server_address;
         this.client_port = client_port;
         this.coordination_port = cordination_port;
-        System.out.println(server_id + " server created");
+        //System.out.println(server_id + " server created");
     }
 
     public String getServer_id() {

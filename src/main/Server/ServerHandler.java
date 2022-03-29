@@ -30,10 +30,11 @@ public class ServerHandler extends Thread {
 
     @Override
     public void run() {
-        System.out.println("ServerHeanderler");
         try {
             while (true) {
+                //System.out.println(serverCoordinationSocket.getLocalSocketAddress());
                 Socket serverSocket = serverCoordinationSocket.accept();
+                System.out.println("wrhbj");
                 BufferedReader bufferedReader = new BufferedReader(
                         new InputStreamReader(serverSocket.getInputStream(), StandardCharsets.UTF_8)
                 );

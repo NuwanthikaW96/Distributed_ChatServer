@@ -27,8 +27,14 @@ public class Main {
 
     public static void main(String[] args) {
 
-        ServerState.getServerState().serverInitializeWithConfig("s1", "D:\\Sem 8\\Distributed system\\ChatServer\\src\\main\\config\\server_config.txt");
+//        ServerState.getServerState().serverInitializeWithConfig("s1", "E:\\Semester 8\\Distributed Systems\\Distributed_ChatServer\\src\\main\\config\\server_config.txt");
+//        System.out.println("LOG  : ------server started------");
+        ServerState.getServerState().serverInitializeWithConfig("s2", "E:\\Semester 8\\Distributed Systems\\Distributed_ChatServer\\src\\main\\config\\server_config.txt");
         System.out.println("LOG  : ------server started------");
+        /*ServerState.getServerState().serverInitializeWithConfig("s3", "E:\\Semester 8\\Distributed Systems\\Distributed_ChatServer\\src\\main\\config\\server_config.txt");
+        System.out.println("LOG  : ------server started------");*/
+//        System.out.println("LOG  : ARG[0] = " + args[0] + " ARG[1] = '" + args[1] + "'");
+//        ServerState.getServerState().serverInitializeWithConfig(args[0], args[1]);
 
         try {
 
@@ -59,6 +65,8 @@ public class Main {
                     ServerState.getServerState().getServer_address(),
                     ServerState.getServerState().getClient_port()
             );
+            //System.out.println(endPointClient);
+
             ClientServerSocket.bind(endPointClient);
             System.out.println(ClientServerSocket.getLocalSocketAddress());
             System.out.println("LOG  : TCP Server waiting for clients on port " +
@@ -68,13 +76,13 @@ public class Main {
 
             serverHandler.start();
 
-            Runnable heartbeat = new Heartbeat("Heartbeat");
-            new Thread(heartbeat).start();
+            //Runnable heartbeat = new Heartbeat("Heartbeat");
+            //new Thread(heartbeat).start();
 
             if (isGossip) {
                 System.out.println("Failure Detection is running GOSSIP mode");
-                startGossip();
-                startConsensus();
+                //startGossip();
+                //startConsensus();
             }
 
             while (true) {

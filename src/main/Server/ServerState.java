@@ -85,7 +85,7 @@ public class ServerState {
                 }
                 Server server = new Server(server_id, server_address, client_port, coordination_port);
                 ServerDictionary.put(server.getServer_id(), server);
-                System.out.println(ServerDictionary);
+                //System.out.println(ServerDictionary);
 
             }
             scanner.close();
