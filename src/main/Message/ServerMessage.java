@@ -207,5 +207,13 @@ public class ServerMessage {
         jsonObject.put("serverid", serverID);
         return jsonObject;
     }
+
+    @SuppressWarnings("unchecked")
+    public static  JSONObject heartbeatMessage(String serverID){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "heartbeat");
+        jsonObject.put("serverid", serverID);
+        return jsonObject;
+    }
 }
 

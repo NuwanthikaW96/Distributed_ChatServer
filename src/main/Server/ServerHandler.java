@@ -30,6 +30,7 @@ public class ServerHandler extends Thread {
 
     @Override
     public void run() {
+        System.out.println("ServerHeanderler");
         try {
             while (true) {
                 Socket serverSocket = serverCoordinationSocket.accept();
@@ -41,8 +42,9 @@ public class ServerHandler extends Thread {
                 // convert received message to json object
                 JSONObject j_object = MessageTransfer.convertToJson(jsonStringFromServer);
 
-
+                System.out.println(j_object);
                 if (MessageTransfer.hasKey(j_object, "election")) {
+                    System.out.println("buly");
                     String electionMessageType = (String) j_object.get("electionMessageType");
                     switch(electionMessageType){
                         case "start_election":
