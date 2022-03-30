@@ -29,14 +29,15 @@ public class Main {
 
     public static void main(String[] args) {
 
-        ServerState.getServerState().serverInitializeWithConfig("s1", "src/main/config/server_config.txt");
-        System.out.println("LOG  : ------server started------");
+//        ServerState.getServerState().serverInitializeWithConfig("s1", "src/main/config/server_config.txt");
+//        System.out.println("LOG  : ------server started------");
 //        ServerState.getServerState().serverInitializeWithConfig("s2", "src/main/config/server_config.txt");
 //        System.out.println("LOG  : ------server started------");
 //        ServerState.getServerState().serverInitializeWithConfig("s3", "src/main/config/server_config.txt");
 //        System.out.println("LOG  : ------server started------");
-//        System.out.println("LOG  : ARG[0] = " + args[0] + " ARG[1] = '" + args[1] + "'");
-//        ServerState.getServerState().serverInitializeWithConfig(args[0], args[1]);
+        System.out.println("LOG  : ARG[0] = " + args[0] + " ARG[1] = '" + args[1] + "'");
+        ServerState.getServerState().serverInitializeWithConfig(args[0], args[1]);
+        System.out.println("LOG  : ------server started------");
 
         try {
 
