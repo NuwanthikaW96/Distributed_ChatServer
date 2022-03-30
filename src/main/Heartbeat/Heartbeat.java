@@ -10,8 +10,6 @@ import main.Message.ServerMessage;
 import main.Server.Server;
 import main.Server.ServerState;
 
-//import static jdk.internal.logger.DefaultLoggerFinder.SharedLoggers.system;
-
 public class Heartbeat implements Runnable{
 
     private final String operation;
@@ -23,12 +21,9 @@ public class Heartbeat implements Runnable{
 
     @Override
     public void run() {
-        //ystem.out.println("heartbeat");
         switch(operation) {
             case "heartbeat":
                 while(this.active) {
-                    System.out.println("1"+ServerState.getServerState().getServer_id());
-                    System.out.println("2"+ServerState.getServerState().getLeader().getServer_id());
                     if(!ServerState.getServerState().getServer_id().equals(ServerState.getServerState().getLeader().getServer_id())) {
                         try {
                             Thread.sleep(1500);
@@ -68,6 +63,5 @@ public class Heartbeat implements Runnable{
         if(ServerState.getServerState().getServer_id().equals(ServerState.getServerState().getLeader().getServer_id())) {
             String senderID = response.get( "sender" ).toString();
         }
-    };
-
+    }
 }

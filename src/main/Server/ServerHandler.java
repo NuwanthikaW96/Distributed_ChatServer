@@ -5,6 +5,7 @@ import java.io.*;
 import main.Client.ClientThreadHandler;
 import main.Client.ClientState;
 import main.Consensus.LeaderState;
+import main.Consensus.LeaderStateUpdate;
 import main.Heartbeat.Consensus;
 import main.Heartbeat.Gossiping;
 import main.Leader.FastBully;
@@ -22,7 +23,7 @@ import java.util.ArrayList;
 public class ServerHandler extends Thread {
 
     private final ServerSocket serverCoordinationSocket;
-
+    private LeaderStateUpdate leaderStateUpdate = new LeaderStateUpdate();
 
     public ServerHandler(ServerSocket serverCoordinationSocket) {
         this.serverCoordinationSocket = serverCoordinationSocket;
@@ -43,16 +44,18 @@ public class ServerHandler extends Thread {
                 // convert received message to json object
                 JSONObject j_object = MessageTransfer.convertToJson(jsonStringFromServer);
 
-                System.out.println(j_object);
-                if (MessageTransfer.hasKey(j_object, "election")) {
+                System.out.println("j_object " + j_object );
+                if (MessageTransfer.hasKey(j_object, "type")) {
                     System.out.println("buly");
                     String electionMessageType = (String) j_object.get("electionMessageType");
+                    System.out.println(electionMessageType);
                     switch(electionMessageType){
                         case "start_election":
                             FastBully.replyToElectionStartMessage(j_object);
                             break;
 
                         case "answer_election":
+                            System.out.println("answer_election");
                             FastBully.receiveElectionAnswerMessage(j_object);
                             break;
 
@@ -282,6 +285,21 @@ public class ServerHandler extends Thread {
                         LeaderState.getLeaderState().removeClient(clientID, formerRoomID);
                         System.out.println("INFO : Client '" + clientID + "' deleted by leader");
 
+                    } else if (j_object.get("type").equals("leaderstateupdate")) {
+                        if( LeaderState.getLeaderState().isLeaderElectedAndIamLeader() ) {
+
+                            if( !leaderStateUpdate.isAlive() ) {
+                                leaderStateUpdate = new LeaderStateUpdate();
+                                leaderStateUpdate.start();
+                            }
+                            leaderStateUpdate.receiveUpdate( j_object );
+                        }
+                    } else if (j_object.get("type").equals("leaderstateupdatecomplete")) {
+                        int serverID = Integer.parseInt(j_object.get("serverid").toString());
+                        if( LeaderState.getLeaderState().isLeaderElectedAndMessageFromLeader( serverID ) ) {
+                            System.out.println("INFO : Received leader update complete message from s"+serverID);
+                            FastBully.leaderUpdateComplete = true;
+                        }
                     } else if (j_object.get("type").equals("gossip")) {
                         Gossiping.receiveMessages(j_object);
 

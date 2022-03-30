@@ -76,16 +76,38 @@ public class ServerState {
             Scanner scanner = new Scanner(configFile);
             while (scanner.hasNextLine()) {
                 String data = scanner.nextLine();
+
                 String[] server_config_list = data.split("\\s+");
+//                for(String s : server_config_list){
+//                    System.out.println("Hi " + s);
+//                }
                 if (server_config_list[0].equals(server_id)){
                     this.server_address = server_config_list[1];
                     this.client_port = parseInt(server_config_list[2]);
                     this.coordination_port = parseInt(server_config_list[3]);
                     this.self_id = parseInt(server_config_list[0].substring(1, 2));
+                    Server server = new Server(server_config_list[0], server_config_list[1], parseInt(server_config_list[2]), parseInt(server_config_list[3]));
+                    ServerDictionary.put(server.getServer_id(), server);
                 }
-                Server server = new Server(server_id, server_address, client_port, coordination_port);
-                ServerDictionary.put(server.getServer_id(), server);
-                //System.out.println(ServerDictionary);
+
+
+
+//                data = scanner.nextLine();
+//                server_config_list = data.split("\\s+");
+//                for(String s : server_config_list){
+//                    System.out.println(s);
+//                }
+//                if (server_config_list[0].equals(server_id)){
+//                    this.server_address = server_config_list[1];
+//                    this.client_port = parseInt(server_config_list[2]);
+//                    this.coordination_port = parseInt(server_config_list[3]);
+//                    this.self_id = parseInt(server_config_list[0].substring(1, 2));
+//                }
+//                Server server1 = new Server(server_id, server_address, client_port, coordination_port);
+//                ServerDictionary.put(server1.getServer_id(), server1);
+
+
+
 
             }
             scanner.close();
@@ -181,6 +203,13 @@ public class ServerState {
     }
 
     public ConcurrentHashMap<Integer, Server> getServers() {
+        ConcurrentHashMap<String, Server> severDict =  getServerDictionary();
+        for (String server : severDict.keySet()) {
+            System.out.println(server);
+            Server s = severDict.get(server);
+            servers.put(parseInt(server.substring(1,2)),s);
+            // use the key here
+        }
         return servers;
     }
 

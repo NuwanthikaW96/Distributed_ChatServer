@@ -1,5 +1,6 @@
 package main.Message;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.*;
@@ -200,6 +201,27 @@ public class ServerMessage {
     }
 
     @SuppressWarnings("unchecked")
+    public static JSONObject getLeaderStateUpdate( List<String> clientIdList, List<List<String>> chatRoomList) {
+        JSONArray clients = new JSONArray();
+        clients.addAll( clientIdList );
+
+        JSONArray chatRooms = new JSONArray();
+        for( List<String> chatRoomObj : chatRoomList ) {
+            JSONObject chatRoom = new JSONObject();
+            chatRoom.put( "clientid", chatRoomObj.get( 0 ) );
+            chatRoom.put( "roomid", chatRoomObj.get( 1 ) );
+            chatRoom.put( "serverid", chatRoomObj.get( 2 ) );
+            chatRooms.add( chatRoom );
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "leaderstateupdate");
+        jsonObject.put("clients", clients);
+        jsonObject.put("chatrooms", chatRooms);
+        return jsonObject;
+    }
+
+    @SuppressWarnings("unchecked")
     public static JSONObject getLeaderStateUpdateComplete(String serverID) {
         // {"type" : "leaderstateupdatecomplete", "serverid" : "s3"}
         JSONObject jsonObject = new JSONObject();
@@ -215,5 +237,28 @@ public class ServerMessage {
         jsonObject.put("serverid", serverID);
         return jsonObject;
     }
-}
 
+    @SuppressWarnings("unchecked")
+    public static JSONObject getRoomCreateApprovalRequest(String clientID, String roomID, String sender, String threadID) {
+        // {"type" : "roomcreateapprovalrequest", "clientid" : "Adel", "roomid" : "jokes", "sender" : "s2", "threadid" : "10"}
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "roomcreateapprovalrequest");
+        jsonObject.put("clientid", clientID);
+        jsonObject.put("roomid", roomID);
+        jsonObject.put("sender", sender);
+        jsonObject.put("threadid", threadID);
+        return jsonObject;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONObject getClientIdApprovalRequest(String clientID, String sender, String threadID) {
+        // {"type" : "clientidapprovalrequest", "clientid" : "Adel", "sender" : "s2", "threadid" : "10"}
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "clientidapprovalrequest");
+        jsonObject.put("clientid", clientID);
+        jsonObject.put("sender", sender);
+        jsonObject.put("threadid", threadID);
+        return jsonObject;
+    }
+
+}

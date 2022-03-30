@@ -85,6 +85,7 @@ public class LeaderState {
 
     public void removeClient(String clientID, String formerRoomID) {
         activeClientsList.remove(clientID);
+        System.out.println(activeChatRooms);
         activeChatRooms.get(formerRoomID).removeParticipants(clientID);
     }
 
@@ -123,6 +124,7 @@ public class LeaderState {
     }
 
     public void addApprovedRoom(String clientID, String roomID, String serverID) {
+        System.out.println("addApprovedRoom");
         ChatRoom room = new ChatRoom(clientID, roomID, serverID);
         activeChatRooms.put(roomID, room);
 
@@ -147,5 +149,13 @@ public class LeaderState {
 
     public List<String> getClientIDList() {
         return activeClientsList;
+    }
+
+    public boolean isLeaderElectedAndMessageFromLeader(int serverID) {
+        return serverID == getLeader_id();
+    }
+
+    public boolean isLeaderElectedAndIamLeader() {
+        return parseInt(ServerState.getServerState().getServer_id()) == LeaderState.getLeaderState().getLeader_id();
     }
 }

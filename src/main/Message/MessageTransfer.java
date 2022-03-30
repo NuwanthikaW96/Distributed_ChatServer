@@ -57,6 +57,8 @@ public class MessageTransfer {
     {
         Server destServer = ServerState.getServerState().getServers()
                 .get( LeaderState.getLeaderState().getLeader_id() );
+        System.out.println(ServerState.getServerState().getServers());
+        System.out.println(destServer);
         Socket socket = new Socket(destServer.getServer_address(),
                 destServer.getCordination_port());
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());

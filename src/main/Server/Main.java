@@ -1,9 +1,11 @@
 package main.Server;
 
 import main.Client.ClientThreadHandler;
+import main.Consensus.LeaderState;
 import main.Heartbeat.Gossiping;
 import main.Heartbeat.Consensus;
 import main.Heartbeat.Heartbeat;
+import main.Leader.FastBully;
 import main.Model.Constant;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
@@ -27,12 +29,12 @@ public class Main {
 
     public static void main(String[] args) {
 
-//        ServerState.getServerState().serverInitializeWithConfig("s1", "E:\\Semester 8\\Distributed Systems\\Distributed_ChatServer\\src\\main\\config\\server_config.txt");
-//        System.out.println("LOG  : ------server started------");
-        ServerState.getServerState().serverInitializeWithConfig("s2", "E:\\Semester 8\\Distributed Systems\\Distributed_ChatServer\\src\\main\\config\\server_config.txt");
+        ServerState.getServerState().serverInitializeWithConfig("s1", "src/main/config/server_config.txt");
         System.out.println("LOG  : ------server started------");
-        /*ServerState.getServerState().serverInitializeWithConfig("s3", "E:\\Semester 8\\Distributed Systems\\Distributed_ChatServer\\src\\main\\config\\server_config.txt");
-        System.out.println("LOG  : ------server started------");*/
+//        ServerState.getServerState().serverInitializeWithConfig("s2", "src/main/config/server_config.txt");
+//        System.out.println("LOG  : ------server started------");
+//        ServerState.getServerState().serverInitializeWithConfig("s3", "src/main/config/server_config.txt");
+//        System.out.println("LOG  : ------server started------");
 //        System.out.println("LOG  : ARG[0] = " + args[0] + " ARG[1] = '" + args[1] + "'");
 //        ServerState.getServerState().serverInitializeWithConfig(args[0], args[1]);
 
@@ -58,7 +60,7 @@ public class Main {
 
 
             // port open for coordination server socket for client
-            ServerSocket ClientServerSocket = new ServerSocket();
+            ServerSocket clientServerSocket = new ServerSocket();
 
             // bind SocketAddress with inetAddress and port
             SocketAddress endPointClient = new InetSocketAddress(
@@ -67,32 +69,34 @@ public class Main {
             );
             //System.out.println(endPointClient);
 
-            ClientServerSocket.bind(endPointClient);
-            System.out.println(ClientServerSocket.getLocalSocketAddress());
+            clientServerSocket.bind(endPointClient);
+            System.out.println(clientServerSocket.getLocalSocketAddress());
             System.out.println("LOG  : TCP Server waiting for clients on port " +
-                    ClientServerSocket.getLocalPort()); // port open for clients
+                    clientServerSocket.getLocalPort()); // port open for clients
 
             ServerHandler serverHandler = new ServerHandler(coordinatorServerSocket);
 
             serverHandler.start();
 
-            //Runnable heartbeat = new Heartbeat("Heartbeat");
-            //new Thread(heartbeat).start();
+            Server newLeader = FastBully.getLeader();
+            ServerState.getServerState().setLeader(newLeader);
+            LeaderState.getLeaderState().setLeader_id(ServerState.getServerState().getSelf_id());
+
+            Runnable heartbeat = new Heartbeat("Heartbeat");
+            new Thread(heartbeat).start();
 
             if (isGossip) {
                 System.out.println("Failure Detection is running GOSSIP mode");
-                //startGossip();
+               //startGossip();
                 //startConsensus();
             }
 
             while (true) {
-                Socket clientSocket = ClientServerSocket.accept();
+                Socket clientSocket = clientServerSocket.accept();
                 ClientThreadHandler clientHandlerThread = new ClientThreadHandler(clientSocket);
                 // starting the thread
                 ServerState.getServerState().addClientHandlerThreadToMap(clientHandlerThread);
                 clientHandlerThread.start();
-//            }
-
             }
         } catch (IllegalArgumentException e) {
             System.out.println("ERROR : invalid server ID");
@@ -100,11 +104,12 @@ public class Main {
             System.out.println("ERROR : server arguments not provided");
             e.printStackTrace();
         } catch (IOException e) {
-            System.out.println("ERROR : occurred in main " + Arrays.toString(e.getStackTrace()));
+            e.printStackTrace();
+//            System.out.println("ERROR : occurred in main " + Arrays.toString(e.getStackTrace()));
         }
     }
 
-        private static void startGossip() {
+    private static void startGossip() {
         try {
 
             JobDetail gossipJob = JobBuilder.newJob(Gossiping.class)
