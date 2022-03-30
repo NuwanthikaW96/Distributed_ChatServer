@@ -50,7 +50,7 @@ public class Main {
 
 //          bind SocketAddress with inetAddress and port
             SocketAddress endPointCoordination = new InetSocketAddress(
-                    "0.0.0.0",//ServerState.getInstance().getServerAddress()
+                    ServerState.getServerState().getServer_address(),
                     ServerState.getServerState().getCoordination_port()
             );
 
