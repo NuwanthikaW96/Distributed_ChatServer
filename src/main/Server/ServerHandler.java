@@ -5,6 +5,7 @@ import java.io.*;
 import main.Client.ClientThreadHandler;
 import main.Client.ClientState;
 import main.Consensus.LeaderState;
+import main.Consensus.LeaderStateUpdate;
 import main.Heartbeat.Consensus;
 import main.Heartbeat.Gossiping;
 import main.Leader.FastBully;
@@ -22,7 +23,7 @@ import java.util.ArrayList;
 public class ServerHandler extends Thread {
 
     private final ServerSocket serverCoordinationSocket;
-
+    private LeaderStateUpdate leaderStateUpdate = new LeaderStateUpdate();
 
     public ServerHandler(ServerSocket serverCoordinationSocket) {
         this.serverCoordinationSocket = serverCoordinationSocket;
@@ -282,6 +283,20 @@ public class ServerHandler extends Thread {
                         LeaderState.getLeaderState().removeClient(clientID, formerRoomID);
                         System.out.println("INFO : Client '" + clientID + "' deleted by leader");
 
+                    } else if (j_object.get("type").equals("leaderstateupdate")) {
+                        if( LeaderState.getLeaderState().isLeaderElectedAndIamLeader() ) {
+                            if( !leaderStateUpdate.isAlive() ) {
+                                leaderStateUpdate = new LeaderStateUpdate();
+                                leaderStateUpdate.start();
+                            }
+                            leaderStateUpdate.receiveUpdate( j_object );
+                        }
+                    } else if (j_object.get("type").equals("leaderstateupdatecomplete")) {
+                        int serverID = Integer.parseInt(j_object.get("serverid").toString());
+                        if( LeaderState.getLeaderState().isLeaderElectedAndMessageFromLeader( serverID ) ) {
+                            System.out.println("INFO : Received leader update complete message from s"+serverID);
+                            FastBully.leaderUpdateComplete = true;
+                        }
                     } else if (j_object.get("type").equals("gossip")) {
                         Gossiping.receiveMessages(j_object);
 

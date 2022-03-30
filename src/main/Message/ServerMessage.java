@@ -1,5 +1,6 @@
 package main.Message;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.*;
@@ -154,7 +155,7 @@ public class ServerMessage {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("type", "movejoinack");
         jsonObject.put("sender", sender);
-        jsonObject.put("roomid", roomID);
+            jsonObject.put("roomid", roomID);
         jsonObject.put("former", formerRoomID);
         jsonObject.put("clientid", clientID);
         jsonObject.put("threadid", threadID);
@@ -196,6 +197,27 @@ public class ServerMessage {
         jsonObject.put("type", "listresponse");
         jsonObject.put("threadid", threadID);
         jsonObject.put("rooms", roomIDList);
+        return jsonObject;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONObject getLeaderStateUpdate( List<String> clientIdList, List<List<String>> chatRoomList) {
+        JSONArray clients = new JSONArray();
+        clients.addAll( clientIdList );
+
+        JSONArray chatRooms = new JSONArray();
+        for( List<String> chatRoomObj : chatRoomList ) {
+            JSONObject chatRoom = new JSONObject();
+            chatRoom.put( "clientid", chatRoomObj.get( 0 ) );
+            chatRoom.put( "roomid", chatRoomObj.get( 1 ) );
+            chatRoom.put( "serverid", chatRoomObj.get( 2 ) );
+            chatRooms.add( chatRoom );
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "leaderstateupdate");
+        jsonObject.put("clients", clients);
+        jsonObject.put("chatrooms", chatRooms);
         return jsonObject;
     }
 

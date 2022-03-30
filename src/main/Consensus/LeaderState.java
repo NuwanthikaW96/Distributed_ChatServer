@@ -148,4 +148,12 @@ public class LeaderState {
     public List<String> getClientIDList() {
         return activeClientsList;
     }
+
+    public boolean isLeaderElectedAndMessageFromLeader(int serverID) {
+        return serverID == getLeader_id();
+    }
+
+    public boolean isLeaderElectedAndIamLeader() {
+        return parseInt(ServerState.getServerState().getServer_id()) == LeaderState.getLeaderState().getLeader_id();
+    }
 }

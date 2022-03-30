@@ -1,5 +1,7 @@
 package main.Leader;
 
+import main.Consensus.LeaderState;
+import main.Consensus.LeaderStateUpdate;
 import main.Message.MessageTransfer;
 import main.Message.ServerMessage;
 import main.Server.Server;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import org.json.simple.JSONObject;
 
 public class FastBully {
+    public static boolean leaderUpdateComplete = false;
     private static ArrayList<Server> serverList = new ArrayList<>();
     private static ArrayList<Server> workingServers = new ArrayList<>();
     private static Server leader;
@@ -94,11 +97,17 @@ public class FastBully {
         sendIamCoordinatorMsg();
     }
 
-    public static void receiveCoordinatorConfirmationMessage(JSONObject response){
+    public static void receiveCoordinatorConfirmationMessage(JSONObject response) throws IOException{
         String senderId = (String) response.get("senderServerId");
         Server senderServer = ServerState.getServerState().getServerDictionary().get(senderId);
         leader = senderServer;
         ServerState.getServerState().setLeader(senderServer);
+        MessageTransfer.sendToLeader(
+                ServerMessage.getLeaderStateUpdate(
+                        ServerState.getServerState().getClientIdList(),
+                        ServerState.getServerState().getChatRoomList()
+                )
+        );
     }
 
     public static void serverRecoveredMessage(){
