@@ -152,9 +152,21 @@ public class ClientThreadHandler extends Thread{
                 Thread.sleep(1000);
             }
             // if self is leader get direct approval
+            //System.out.println("he;lloooo");
             if (LeaderState.getLeaderState().isLeader()) {
-                boolean approved = LeaderState.getLeaderState().isRoomCreationApproved(newRoomId);
+                boolean approved;
+                if (roomsListTemp.contains(newRoomId)){
+                    approved = false;
+                    approvedRoomCreation = "neutral";
+                }else{
+                    approved = true;
+                    approvedRoomCreation = "yes";
+                    roomsListTemp.add(newRoomId);
+                    System.out.println(roomsListTemp);
+                }
+                //boolean approved = LeaderState.getLeaderState().isRoomCreationApproved(newRoomId);
                 approvedRoomCreation = approved ? "yes" : "neutral";
+
                 System.out.println("INFO : Room '" + newRoomId +
                         "' creation request from client " + clientState.getClient_id() +
                         " is" + (approved ? " " : " not ") + "approved");
@@ -185,6 +197,13 @@ public class ClientThreadHandler extends Thread{
 
             if (approvedRoomCreation == "yes") {
                 System.out.println("INFO : Received correct room ID ::" + jsonStringFromClient);
+
+
+//                for (String key : ServerState.getServerState().getChatRoomDictionary().keySet()) {
+//                    Object subAccountObject = ServerState.getServerState().getChatRoomDictionary().get(key);
+//                    String roomId = ((ChatRoom) subAccountObject).getRoom_id();
+//                    roomsListTemp.add(roomId);
+//                }
 
                 String formerRoomId = clientState.getRoom_id();
 
@@ -292,11 +311,14 @@ public class ClientThreadHandler extends Thread{
     private void list(Socket connected, String jsonStringFromClient) throws IOException {
         //roomsListTemp = null;
 
-        //leader election
+        //leader electio
+        for (String key : ServerState.getServerState().getChatRoomDictionary().keySet()) {
+            Object subAccountObject = ServerState.getServerState().getChatRoomDictionary().get(key);
+            String roomId = ((ChatRoom) subAccountObject).getRoom_id();
+            roomsListTemp.add(roomId);
+      }
 
         //leader make the list
-        roomsListTemp.add("A");
-        roomsListTemp.add("B");
         System.out.println(roomsListTemp);
         if (roomsListTemp != null){
             System.out.println("INFO : rooms in the system :");
